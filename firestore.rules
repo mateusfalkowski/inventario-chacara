@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Protótipo: qualquer aparelho que abriu o app (login anônimo) lê e grava.
+// Antes de uso real, trocar por login de verdade e/ou lista de usuários permitidos.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /itens/{id} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.quantidade >= 0;
+      allow delete: if false;
+    }
+    match /fotos/{id} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if false;
+    }
+  }
+}
