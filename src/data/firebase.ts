@@ -1,11 +1,13 @@
-// Firebase no plano gratuito (Spark): Firestore + login anônimo.
+// Firebase no plano gratuito (Spark): Firestore + uma conta única da equipe
+// (e-mail fixo em VITE_EQUIPE_EMAIL, o funcionário só digita a senha).
 // Sem Cloud Storage (exige plano pago), então a foto comprimida vai num
 // documento próprio em `fotos/{id}` e a miniatura dentro do item.
 // Se o projeto crescer (plano Blaze), dá para migrar as fotos para o Storage
 // trocando só a função `foto` e a gravação em `adicionar`.
 import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged, signInAnonymously } from 'firebase/auth'
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -19,7 +21,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import type { Item } from '../types'
-import type { Store } from './store'
+import { variacao, type Store } from './store'
 
 const env = import.meta.env
 
@@ -36,8 +38,8 @@ export async function criarStoreFirebase(): Promise<Store> {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   })
 
-  // As regras do banco exigem login; o login anônimo fica salvo no aparelho,
-  // então depois da primeira vez funciona offline também.
+  // As regras do banco exigem login; o login fica salvo no aparelho, então
+  // depois de digitar a senha uma vez funciona offline também.
   const auth = getAuth(app)
   const logado = new Promise<void>((ok) => {
     const parar = onAuthStateChanged(auth, (user) => {
@@ -47,10 +49,6 @@ export async function criarStoreFirebase(): Promise<Store> {
       }
     })
   })
-  if (!auth.currentUser) {
-    await auth.authStateReady()
-    if (!auth.currentUser) signInAnonymously(auth).catch((e) => console.error('Login anônimo falhou', e))
-  }
 
   const falhou = (e: unknown) => console.error('Erro ao gravar no Firestore', e)
 
@@ -79,12 +77,22 @@ export async function criarStoreFirebase(): Promise<Store> {
     atualizar(id, dados) {
       void logado.then(() => updateDoc(doc(db, 'itens', id), dados).catch(falhou))
     },
-    darSaida(id, mov) {
+    movimentar(id, mov) {
       void logado.then(() =>
         updateDoc(doc(db, 'itens', id), {
-          quantidade: increment(-mov.quantidade),
+          quantidade: increment(variacao(mov)),
           movimentos: arrayUnion(mov),
           atualizadoEm: mov.em,
+        }).catch(falhou),
+      )
+    },
+    desfazerSaida(id, mov) {
+      // arrayRemove apaga o movimento que for idêntico a `mov`.
+      void logado.then(() =>
+        updateDoc(doc(db, 'itens', id), {
+          quantidade: increment(mov.quantidade),
+          movimentos: arrayRemove(mov),
+          atualizadoEm: Date.now(),
         }).catch(falhou),
       )
     },
@@ -92,6 +100,15 @@ export async function criarStoreFirebase(): Promise<Store> {
       await logado
       const snap = await getDoc(doc(db, 'fotos', id))
       return snap.exists() ? (snap.data().data as string) : null
+    },
+    observarLogin(cb) {
+      return onAuthStateChanged(auth, (user) => cb(Boolean(user)))
+    },
+    async entrar(senha) {
+      await signInWithEmailAndPassword(auth, env.VITE_EQUIPE_EMAIL ?? '', senha)
+    },
+    async sair() {
+      await signOut(auth)
     },
   }
 }

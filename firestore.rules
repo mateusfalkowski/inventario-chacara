@@ -1,17 +1,24 @@
 rules_version = '2';
 
-// Protótipo: qualquer aparelho que abriu o app (login anônimo) lê e grava.
-// Antes de uso real, trocar por login de verdade e/ou lista de usuários permitidos.
+// Só quem entrou com a senha da equipe (login por e-mail e senha) lê e grava.
+// No console, em Authentication → Configurações → Ações do usuário, desmarque
+// "Ativar criação (inscrição)": assim ninguém cria conta própria pela API e a
+// única conta que existe é a da equipe.
 service cloud.firestore {
   match /databases/{database}/documents {
+    function equipe() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+
     match /itens/{id} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null
+      allow read: if equipe();
+      allow create, update: if equipe()
         && request.resource.data.quantidade >= 0;
       allow delete: if false;
     }
     match /fotos/{id} {
-      allow read, create: if request.auth != null;
+      allow read, create: if equipe();
       allow update, delete: if false;
     }
   }

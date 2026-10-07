@@ -2,7 +2,7 @@
 // "Parados" responde ao pedido do parceiro de não deixar material encalhar.
 import { ir, useApp } from '../app-context'
 import { CartaoItem } from '../components'
-import { CATEGORIAS, DESTINOS, DIAS_PARADO, ESTADOS } from '../config'
+import { CATEGORIAS, DESTINOS, DIAS_PARADO, ESTADOS, destino } from '../config'
 import { baixarArquivo, itensParaCsv } from '../lib/csv'
 import { diasDesde } from '../lib/util'
 
@@ -23,6 +23,14 @@ export default function Painel() {
     n: emEstoque.filter((i) => i.categoria === c.id).length,
   })).filter((x) => x.n > 0)
   const porEstado = ESTADOS.map((e) => ({ ...e, n: emEstoque.filter((i) => i.estado === e.id).length }))
+  // Destino decidido na chegada: mostra quanto do estoque espera venda, doação etc.
+  const porPrevisto = [
+    ...DESTINOS.map((d) => ({
+      nome: `${d.icone} ${d.nome}`,
+      n: emEstoque.filter((i) => i.destinoPrevisto === d.id).length,
+    })),
+    { nome: '❔ Ainda não definido', n: emEstoque.filter((i) => !destino(i.destinoPrevisto ?? '')).length },
+  ].filter((x) => x.n > 0)
   const porDestino = DESTINOS.map((d) => ({
     nome: `${d.icone} ${d.nome}`,
     n: saidas.filter((m) => m.destino === d.id).length,
@@ -54,6 +62,9 @@ export default function Painel() {
 
       <h2>Por categoria</h2>
       {porCategoria.length ? <Barras dados={porCategoria} /> : <p className="fraco">Nada no estoque.</p>}
+
+      <h2>Destino previsto do estoque</h2>
+      {porPrevisto.length ? <Barras dados={porPrevisto} /> : <p className="fraco">Nada no estoque.</p>}
 
       {porDestino.length > 0 && (
         <>

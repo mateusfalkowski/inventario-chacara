@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Ctx, ir, lembrado, lembrar, useRota } from './app-context'
 import { criarStore, type Store } from './data/store'
+import Editar from './screens/Editar'
 import Estoque from './screens/Estoque'
 import Etiqueta from './screens/Etiqueta'
 import Inicio from './screens/Inicio'
@@ -15,6 +16,8 @@ export default function App() {
   const [itens, setItens] = useState<Item[] | null>(null)
   const [erro, setErro] = useState('')
   const [operador, setOperador] = useState(() => lembrado('operador'))
+  // undefined = ainda conferindo se este aparelho já entrou com a senha
+  const [logado, setLogado] = useState<boolean | undefined>(undefined)
   const [online, setOnline] = useState(navigator.onLine)
   const rota = useRota()
 
@@ -22,6 +25,7 @@ export default function App() {
     criarStore().then(setStore, (e) => setErro(String(e)))
   }, [])
 
+  useEffect(() => store?.observarLogin(setLogado), [store])
   useEffect(() => store?.observar(setItens), [store])
 
   useEffect(() => {
@@ -36,8 +40,10 @@ export default function App() {
   }, [])
 
   if (erro) return <Mensagem>Não foi possível abrir o banco de dados: {erro}</Mensagem>
+  if (!store || logado === undefined) return <Mensagem>Carregando…</Mensagem>
+  if (!logado) return <PedeSenha store={store} />
   if (!operador) return <PerguntaNome onPronto={(n) => (lembrar('operador', n), setOperador(n))} />
-  if (!store || !itens) return <Mensagem>Carregando…</Mensagem>
+  if (!itens) return <Mensagem>Carregando…</Mensagem>
 
   const [tela, id] = rota.partes
   const naInicio = !tela
@@ -64,6 +70,8 @@ export default function App() {
           <Estoque modoSaida={rota.busca.has('saida')} />
         ) : tela === 'item' && id ? (
           <ItemDetalhe id={id} />
+        ) : tela === 'editar' && id ? (
+          <Editar id={id} />
         ) : tela === 'saida' && id ? (
           <Saida id={id} />
         ) : tela === 'etiqueta' && id ? (
@@ -80,6 +88,54 @@ export default function App() {
 
 function Mensagem({ children }: { children: React.ReactNode }) {
   return <div className="mensagem">{children}</div>
+}
+
+function PedeSenha({ store }: { store: Store }) {
+  const [senha, setSenha] = useState('')
+  const [erro, setErro] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  return (
+    <form
+      className="pergunta-nome"
+      onSubmit={async (e) => {
+        e.preventDefault()
+        setErro('')
+        setOcupado(true)
+        try {
+          await store.entrar(senha)
+        } catch {
+          setErro(
+            navigator.onLine
+              ? 'Senha errada. Confira com o responsável.'
+              : 'Sem internet. Na primeira vez precisa de sinal.',
+          )
+        } finally {
+          setOcupado(false)
+        }
+      }}
+    >
+      <img src="icon.svg" alt="" width={72} height={72} />
+      <h1>Inventário Chácara</h1>
+      <p>Digite a senha da equipe. Só precisa fazer isso uma vez neste celular.</p>
+      <input
+        autoFocus
+        type="password"
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        placeholder="Senha da equipe"
+        autoComplete="current-password"
+      />
+      {erro && <p className="erro">{erro}</p>}
+      <button className={`botao principal${ocupado ? ' ocupado' : ''}`} disabled={!senha}>
+        Entrar
+      </button>
+      {store.modo === 'local' && (
+        <p className="aviso">
+          <strong>Modo demonstração:</strong> qualquer senha entra.
+        </p>
+      )}
+    </form>
+  )
 }
 
 function PerguntaNome({ onPronto }: { onPronto: (nome: string) => void }) {

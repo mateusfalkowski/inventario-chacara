@@ -7,7 +7,8 @@ import { qtd } from '../lib/util'
 export default function Saida({ id }: { id: string }) {
   const { itens, store, operador } = useApp()
   const item = itens.find((i) => i.id === id)
-  const [dest, setDest] = useState('')
+  // Já vem marcado o destino decidido na chegada; dá para trocar.
+  const [dest, setDest] = useState(item?.destinoPrevisto ?? '')
   const [quantidade, setQuantidade] = useState(item?.quantidade ?? 1)
   const [obs, setObs] = useState('')
 
@@ -35,7 +36,7 @@ export default function Saida({ id }: { id: string }) {
 
   function confirmar() {
     if (!valido || !item) return
-    store.darSaida(item.id, {
+    store.movimentar(item.id, {
       tipo: 'saida',
       quantidade,
       destino: dest,

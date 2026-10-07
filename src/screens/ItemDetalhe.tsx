@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { ir, useApp } from '../app-context'
-import { Chips, SeloEstado, tituloItem } from '../components'
-import { ESTADOS, LOCAIS, categoria, destino } from '../config'
+import { Contador, SeloEstado, tituloItem } from '../components'
+import { categoria, destino } from '../config'
 import { dataCurta, diasDesde, qtd } from '../lib/util'
-import type { EstadoId } from '../types'
+import type { Item, Movimento } from '../types'
 
 export default function ItemDetalhe({ id }: { id: string }) {
-  const { itens, store } = useApp()
+  const { itens, store, operador } = useApp()
   const item = itens.find((i) => i.id === id)
   const [foto, setFoto] = useState<string | null>(null)
-  const [editando, setEditando] = useState(false)
+  const [chegou, setChegou] = useState(0)
 
   useEffect(() => {
     setFoto(null)
@@ -53,6 +53,8 @@ export default function ItemDetalhe({ id }: { id: string }) {
         <dd>{esgotado ? 'Saiu tudo' : qtd(item.quantidade, item.unidade)}</dd>
         <dt>Local</dt>
         <dd>{item.local || '—'}</dd>
+        <dt>Destino previsto</dt>
+        <dd>{destino(item.destinoPrevisto ?? '')?.nome ?? 'Ainda não definido'}</dd>
         <dt>Obra de origem</dt>
         <dd>{item.origem || '—'}</dd>
         <dt>Cadastrado</dt>
@@ -73,31 +75,30 @@ export default function ItemDetalhe({ id }: { id: string }) {
         </button>
       )}
       <div className="botoes-lado">
+        <button className="botao" onClick={() => setChegou(chegou ? 0 : 1)}>
+          ➕ Chegou mais
+        </button>
+        <button className="botao" onClick={() => ir(`/editar/${item.id}`)}>
+          ✏️ Corrigir dados
+        </button>
         <button className="botao" onClick={() => ir(`/etiqueta/${item.id}`)}>
           🏷️ Etiqueta
         </button>
-        <button className="botao" onClick={() => setEditando(!editando)}>
-          ✏️ {editando ? 'Fechar' : 'Mudar local/estado'}
-        </button>
       </div>
 
-      {editando && (
+      {chegou > 0 && (
         <div className="edicao">
-          <label className="campo-titulo">Local</label>
-          <Chips
-            opcoes={LOCAIS}
-            valor={item.local}
-            onChange={(local) => store.atualizar(item.id, { local, atualizadoEm: Date.now() })}
-          />
-          <label className="campo-titulo">Estado</label>
-          <Chips
-            opcoes={ESTADOS.map((e) => e.nome)}
-            valor={ESTADOS.find((e) => e.id === item.estado)?.nome ?? ''}
-            onChange={(nome) => {
-              const e = ESTADOS.find((x) => x.nome === nome)
-              if (e) store.atualizar(item.id, { estado: e.id as EstadoId, atualizadoEm: Date.now() })
+          <label className="campo-titulo">Quanto chegou? ({item.unidade})</label>
+          <Contador valor={chegou} onChange={setChegou} min={1} />
+          <button
+            className="botao principal"
+            onClick={() => {
+              store.movimentar(item.id, { tipo: 'entrada', quantidade: chegou, em: Date.now(), por: operador })
+              setChegou(0)
             }}
-          />
+          >
+            ✓ Somar ao estoque
+          </button>
         </div>
       )}
 
@@ -105,18 +106,31 @@ export default function ItemDetalhe({ id }: { id: string }) {
       <ul className="historico">
         {[...item.movimentos].reverse().map((m, i) => (
           <li key={i} className={m.tipo}>
-            <strong>
-              {m.tipo === 'entrada'
-                ? `Entrada: ${qtd(m.quantidade, item.unidade)}`
-                : `Saída: ${qtd(m.quantidade, item.unidade)} · ${destino(m.destino ?? '')?.nome ?? m.destino}`}
-            </strong>
+            <strong>{textoMovimento(m, item)}</strong>
             <span className="fraco">
               {dataCurta(m.em)} · {m.por}
               {m.obs ? ` · ${m.obs}` : ''}
             </span>
+            {m.tipo === 'saida' && (
+              <button
+                className="link"
+                onClick={() =>
+                  confirm(`Desfazer esta saída? ${qtd(m.quantidade, item.unidade)} voltam para o estoque.`) &&
+                  store.desfazerSaida(item.id, m)
+                }
+              >
+                Desfazer (lançada por engano)
+              </button>
+            )}
           </li>
         ))}
       </ul>
     </div>
   )
+}
+
+function textoMovimento(m: Movimento, item: Item) {
+  if (m.tipo === 'entrada') return `Entrada: ${qtd(m.quantidade, item.unidade)}`
+  if (m.tipo === 'ajuste') return `Correção: ${m.quantidade > 0 ? '+' : '−'}${qtd(Math.abs(m.quantidade), item.unidade)}`
+  return `Saída: ${qtd(m.quantidade, item.unidade)} · ${destino(m.destino ?? '')?.nome ?? m.destino}`
 }

@@ -1,7 +1,9 @@
 export type EstadoId = 'novo' | 'seminovo' | 'reparo' | 'sucata'
 
 export interface Movimento {
-  tipo: 'entrada' | 'saida'
+  /** 'ajuste' = correção de quantidade digitada errada */
+  tipo: 'entrada' | 'saida' | 'ajuste'
+  /** Sempre positiva, exceto no ajuste: lá é a diferença (+2, -3) */
   quantidade: number
   /** Só nas saídas: id de DESTINOS */
   destino?: string
@@ -21,6 +23,9 @@ export interface Item {
   estado: EstadoId
   local: string
   origem: string
+  /** Para onde o material deve ir (id de DESTINOS), decidido na chegada. '' = ainda não sabe.
+   *  Itens cadastrados antes deste campo não têm o valor. */
+  destinoPrevisto?: string
   /** Miniatura JPEG em data URL (~15 KB) — a foto grande fica separada */
   thumb: string
   temFoto: boolean

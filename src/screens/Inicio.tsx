@@ -53,6 +53,15 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         </p>
       )}
 
+      <button
+        className="botao leve"
+        onClick={() => {
+          if (confirm('Sair deste celular? Vai precisar da senha da equipe para entrar de novo.')) void store.sair()
+        }}
+      >
+        Sair deste celular
+      </button>
+
       {store.modo === 'local' && (
         <p className="aviso">
           <strong>Modo demonstração:</strong> os dados ficam salvos só neste aparelho. Configure o Firebase para

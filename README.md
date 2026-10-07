@@ -14,11 +14,12 @@ foto primeiro, e funciona **sem internet** (sincroniza quando o sinal volta).
 
 | Tela | Para quê |
 |---|---|
-| **Cadastrar material** | Foto → categoria → estado → quantidade/local. ~5 toques por item. Gera um código curto (ex.: `JACMD`). |
+| **Cadastrar material** | Foto → categoria → estado → destino previsto → quantidade/local. ~6 toques por item. Gera um código curto (ex.: `JACMD`). "Cadastrar outro igual" repete o item anterior e só pede foto e estado. |
+| **Ficha do item** | "Chegou mais" soma quantidade; "Corrigir dados" conserta qualquer campo (quantidade corrigida fica no histórico); saída lançada por engano pode ser desfeita. |
 | **Etiqueta** | Etiqueta com QR para imprimir. A câmera de qualquer celular lê o QR e abre a ficha do item. |
-| **Dar saída** | Venda, doação, artesãos, uso interno, reciclagem ou descarte. Aceita saída parcial. |
+| **Dar saída** | Venda, doação, artesãos, uso interno, reciclagem ou descarte (já vem marcado o destino previsto). Aceita saída parcial. |
 | **Estoque** | Busca por código/nome/local, filtro por categoria. |
-| **Painel** | Totais por estado/categoria, destinos, itens **parados há +90 dias**, exportar planilha (Excel) e imprimir todas as etiquetas. |
+| **Painel** | Totais por estado/categoria, destino previsto do estoque, destinos das saídas, itens **parados há +90 dias**, exportar planilha (Excel) e imprimir todas as etiquetas. |
 
 As listas de categorias, estados, locais e destinos ficam em [`src/config.ts`](src/config.ts) —
 é ali que entram as definições das Equipes 3 (classificação) e 5 (layout do depósito).
@@ -40,18 +41,20 @@ Sem configurar nada, o app roda em **modo demonstração**: tudo fica salvo só 
 Plano gratuito (Spark), **sem cartão de crédito**.
 
 1. Acesse <https://console.firebase.google.com> → **Adicionar projeto** (pode desativar o Google Analytics).
-2. **Build → Authentication → Começar → Anônimo → Ativar.**
+2. **Build → Authentication → Começar → E-mail/senha → Ativar.** Em **Usuários → Adicionar usuário**, crie
+   uma conta só para a equipe (ex.: `equipe@inventario-chacara.app` e uma senha fácil de passar adiante).
+   Em **Configurações → Ações do usuário**, desmarque **Ativar criação (inscrição)**.
 3. **Build → Firestore Database → Criar banco de dados** → local `southamerica-east1` (São Paulo) → modo produção.
 4. Em **Firestore → Regras**, cole o conteúdo de [`firestore.rules`](firestore.rules) e publique.
 5. **Configurações do projeto (⚙️) → Seus apps → Web (`</>`)** → registre o app → copie os valores do `firebaseConfig`.
-6. Copie `.env.example` para `.env.local` e preencha com esses valores.
+6. Copie `.env.example` para `.env.local` e preencha com esses valores e com o e-mail da conta da equipe.
 7. `npm run dev` de novo — o selo "Modo demonstração" some.
 
 ### Firebase na versão publicada no GitHub Pages
 
 No repositório: **Settings → Secrets and variables → Actions → Variables** → crie
 `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` e
-`VITE_FIREBASE_APP_ID` com os mesmos valores do `.env.local` e rode o workflow de novo
+`VITE_FIREBASE_APP_ID` e `VITE_EQUIPE_EMAIL` com os mesmos valores do `.env.local` e rode o workflow de novo
 (essas chaves do Firebase web são públicas por natureza; quem protege os dados são as regras).
 No Firebase, em **Authentication → Configurações → Domínios autorizados**, adicione
 `mateusfalkowski.github.io`.
@@ -82,8 +85,9 @@ No celular, abra o endereço e use **"Adicionar à tela inicial"** para instalar
 
 ## Limitações do protótipo
 
-- Login anônimo: qualquer pessoa com o link consegue usar. Antes de uso real, trocar por login
-  com e-mail/Google e lista de usuários autorizados.
-- Sem edição de quantidade/descrição depois do cadastro (só local e estado).
+- Uma senha só para a equipe, digitada uma vez por celular. Não há conta por pessoa: o nome
+  digitado depois da senha é o que aparece no histórico. Para trocar a senha, mude a da conta
+  da equipe no console e avise todo mundo: trocar a senha desconecta os celulares, que vão
+  pedir a senha nova.
 - Sem campo de preço — aguardando a calculadora da **Equipe 4**.
 - Sem exportação específica para a vitrine da **Equipe 6** — combinar o formato no Encontro 4 (28/10).

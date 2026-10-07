@@ -1,16 +1,17 @@
-// Cadastro em 4 passos curtos, pensado para quem não usa planilha:
-// foto → categoria → estado → quantidade/local. Os passos 2 e 3 avançam
-// sozinhos ao tocar, então um item simples leva ~5 toques.
+// Cadastro em 5 passos curtos, pensado para quem não usa planilha:
+// foto → categoria → estado → destino → quantidade/local. Os passos 2 a 4
+// avançam sozinhos ao tocar, então um item simples leva ~6 toques.
+// O destino na chegada é pedido da Equipe 3 (classificar e destinar na recepção).
 import { useState } from 'react'
 import { ir, lembrado, lembrar, useApp } from '../app-context'
 import { Chips, Contador } from '../components'
-import { CATEGORIAS, ESTADOS, LOCAIS, UNIDADES, categoria } from '../config'
+import { CATEGORIAS, DESTINOS, ESTADOS, LOCAIS, UNIDADES, categoria, destino } from '../config'
 import { prepararFoto } from '../lib/imagem'
 import { novoCodigo, qtd } from '../lib/util'
 import type { EstadoId, Item } from '../types'
 
-type Passo = 'foto' | 'categoria' | 'estado' | 'detalhes' | 'pronto'
-const PASSOS: Passo[] = ['foto', 'categoria', 'estado', 'detalhes']
+type Passo = 'foto' | 'categoria' | 'estado' | 'destino' | 'detalhes' | 'pronto'
+const PASSOS: Passo[] = ['foto', 'categoria', 'estado', 'destino', 'detalhes']
 
 export default function NovoItem() {
   const { store, itens, operador } = useApp()
@@ -19,12 +20,15 @@ export default function NovoItem() {
   const [processando, setProcessando] = useState(false)
   const [cat, setCat] = useState('')
   const [est, setEst] = useState<EstadoId | ''>('')
+  const [dest, setDest] = useState('')
   const [quantidade, setQuantidade] = useState(1)
   const [unidade, setUnidade] = useState('unidade')
   const [local, setLocal] = useState(() => lembrado('ultimoLocal') || LOCAIS[0])
   const [origem, setOrigem] = useState(() => lembrado('ultimaOrigem'))
   const [descricao, setDescricao] = useState('')
   const [salvo, setSalvo] = useState<Item | null>(null)
+  // "Cadastrar outro igual": categoria já escolhida, então a foto pula direto para o estado.
+  const depoisDaFoto: Passo = cat ? 'estado' : 'categoria'
 
   // Obras já usadas viram atalhos, para não digitar o mesmo nome toda vez.
   const obras = [...new Set(itens.map((i) => i.origem).filter(Boolean))].slice(0, 6)
@@ -34,7 +38,7 @@ export default function NovoItem() {
     setProcessando(true)
     try {
       setFoto(await prepararFoto(arquivo))
-      setPasso('categoria')
+      setPasso(depoisDaFoto)
     } catch {
       alert('Não foi possível ler essa foto. Tente de novo.')
     } finally {
@@ -56,6 +60,7 @@ export default function NovoItem() {
       estado: est,
       local,
       origem: origem.trim(),
+      destinoPrevisto: dest,
       thumb: foto?.thumb ?? '',
       temFoto: Boolean(foto),
       criadoEm: agora,
@@ -70,14 +75,18 @@ export default function NovoItem() {
     setPasso('pronto')
   }
 
-  function outro() {
+  function outro(igual: boolean) {
     // Mantém local e obra: normalmente se cadastra vários itens da mesma leva.
+    // "Igual" mantém também o que é (ex.: 10 portas iguais em estados diferentes).
     setFoto(null)
-    setCat('')
     setEst('')
+    setDest('')
     setQuantidade(1)
-    setUnidade('unidade')
-    setDescricao('')
+    if (!igual) {
+      setCat('')
+      setUnidade('unidade')
+      setDescricao('')
+    }
     setSalvo(null)
     setPasso('foto')
   }
@@ -94,9 +103,14 @@ export default function NovoItem() {
         <p className="codigo-grande">{salvo.id}</p>
         <p className="fraco">
           {categoria(salvo.categoria).nome} · {qtd(salvo.quantidade, salvo.unidade)} · {salvo.local}
+          {salvo.destinoPrevisto && ` · ${destino(salvo.destinoPrevisto)?.nome}`}
         </p>
-        <button className="botao principal" onClick={outro}>
+        <button className="botao principal" onClick={() => outro(false)}>
           📷 Cadastrar outro
+        </button>
+        <button className="botao" onClick={() => outro(true)}>
+          📷 Cadastrar outro igual{' '}
+          <small className="fraco">({salvo.descricao || categoria(salvo.categoria).nome}, só muda foto e estado)</small>
         </button>
         <button className="botao" onClick={() => ir(`/etiqueta/${salvo.id}`)}>
           🏷️ Imprimir etiqueta
@@ -143,11 +157,11 @@ export default function NovoItem() {
             />
           </label>
           {foto ? (
-            <button className="botao" onClick={() => setPasso('categoria')}>
+            <button className="botao" onClick={() => setPasso(depoisDaFoto)}>
               Continuar com esta foto
             </button>
           ) : (
-            <button className="botao leve" onClick={() => setPasso('categoria')}>
+            <button className="botao leve" onClick={() => setPasso(depoisDaFoto)}>
               Cadastrar sem foto
             </button>
           )}
@@ -189,7 +203,7 @@ export default function NovoItem() {
                 style={{ '--cor': e.cor } as React.CSSProperties}
                 onClick={() => {
                   setEst(e.id)
-                  setPasso('detalhes')
+                  setPasso('destino')
                 }}
               >
                 <strong>{e.nome}</strong>
@@ -203,9 +217,42 @@ export default function NovoItem() {
         </section>
       )}
 
+      {passo === 'destino' && (
+        <section>
+          <h1>4. Para onde deve ir?</h1>
+          <div className="grade-opcoes">
+            {DESTINOS.map((d) => (
+              <button
+                key={d.id}
+                className={`opcao${dest === d.id ? ' ativo' : ''}`}
+                onClick={() => {
+                  setDest(d.id)
+                  setPasso('detalhes')
+                }}
+              >
+                <span className="opcao-icone">{d.icone}</span>
+                {d.nome}
+              </button>
+            ))}
+          </div>
+          <button
+            className="botao"
+            onClick={() => {
+              setDest('')
+              setPasso('detalhes')
+            }}
+          >
+            Ainda não sei
+          </button>
+          <button className="botao leve" onClick={voltarPasso}>
+            ‹ Voltar
+          </button>
+        </section>
+      )}
+
       {passo === 'detalhes' && (
         <section>
-          <h1>4. Quantos e onde?</h1>
+          <h1>5. Quantos e onde?</h1>
 
           <label className="campo-titulo">Quantidade</label>
           <Contador valor={quantidade} onChange={setQuantidade} />

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ir, useApp } from '../app-context'
 import { CartaoItem } from '../components'
-import { CATEGORIAS, categoria, estado } from '../config'
+import { CATEGORIAS, categoria, destino, estado } from '../config'
 import { normalizarCodigo, semAcento } from '../lib/util'
 
 export default function Estoque({ modoSaida }: { modoSaida: boolean }) {
@@ -19,7 +19,15 @@ export default function Estoque({ modoSaida }: { modoSaida: boolean }) {
       .filter((i) => {
         if (!termo) return true
         const texto = semAcento(
-          [i.id, i.descricao, categoria(i.categoria).nome, estado(i.estado).nome, i.local, i.origem].join(' '),
+          [
+            i.id,
+            i.descricao,
+            categoria(i.categoria).nome,
+            estado(i.estado).nome,
+            destino(i.destinoPrevisto ?? '')?.nome,
+            i.local,
+            i.origem,
+          ].join(' '),
         )
         return termo.split(/\s+/).every((t) => texto.includes(t))
       })
