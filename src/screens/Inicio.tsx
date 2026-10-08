@@ -8,13 +8,6 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
 
   return (
     <div className="inicio">
-      <p className="ola">
-        Olá, <strong>{operador}</strong>{' '}
-        <button className="link" onClick={trocarNome}>
-          (não é você?)
-        </button>
-      </p>
-
       <button className="bloco principal" onClick={() => ir('/novo')}>
         <span className="bloco-icone">📷</span>
         <span>
@@ -53,6 +46,10 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         </p>
       )}
 
+      {/* Sem mostrar o nome na tela: o celular pode estar sendo usado por outra pessoa. */}
+      <button className="botao leve" onClick={trocarNome}>
+        Trocar nome
+      </button>
       <button
         className="botao leve"
         onClick={() => {

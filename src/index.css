@@ -193,10 +193,6 @@ input:focus {
 
 /* ---------- Início ---------- */
 
-.ola {
-  margin: 0.2rem 0 1rem;
-}
-
 .bloco {
   display: flex;
   align-items: center;
@@ -450,27 +446,11 @@ input:focus {
   color: #fff;
 }
 
-.chips.rolagem {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  margin: 0.7rem -1rem 0;
-  padding: 0 1rem 0.3rem;
-  scrollbar-width: none;
-}
-
-.chips.rolagem button {
-  white-space: nowrap;
-  flex: none;
-}
-
-/* Com mouse não dá para arrastar a fileira: mostra todas as categorias quebrando linha. */
-@media (hover: hover) and (pointer: fine) {
-  .chips.rolagem {
-    flex-wrap: wrap;
-    overflow-x: visible;
-    margin: 0.7rem 0 0;
-    padding: 0;
-  }
+/* Filtro do estoque: todas as categorias à vista (fileira deslizante passava
+   despercebida no celular), com botões menores para ocupar menos espaço. */
+.chips.filtro button {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.88rem;
 }
 
 /* ---------- Pronto ---------- */

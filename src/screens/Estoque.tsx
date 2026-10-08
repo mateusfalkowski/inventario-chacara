@@ -59,7 +59,7 @@ export default function Estoque({ modoSaida }: { modoSaida: boolean }) {
         autoFocus={modoSaida}
       />
 
-      <div className="chips rolagem">
+      <div className="chips filtro">
         <button className={!cat ? 'ativo' : ''} onClick={() => setCat('')}>
           Todos
         </button>
