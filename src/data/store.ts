@@ -26,11 +26,13 @@ export interface Store {
 
 const temFirebase = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID)
 
-export async function criarStore(): Promise<Store> {
-  if (temFirebase) {
-    const { criarStoreFirebase } = await import('./firebase')
-    return criarStoreFirebase()
-  }
-  const { criarStoreLocal } = await import('./local')
-  return criarStoreLocal()
+let criado: Promise<Store> | null = null
+
+/** Sempre devolve o mesmo store: o Firebase não aceita ser inicializado duas vezes
+ *  (e o React, em desenvolvimento, roda os efeitos duas vezes de propósito). */
+export function criarStore(): Promise<Store> {
+  criado ??= temFirebase
+    ? import('./firebase').then((m) => m.criarStoreFirebase())
+    : import('./local').then((m) => m.criarStoreLocal())
+  return criado
 }
