@@ -46,6 +46,9 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         </p>
       )}
 
+      <button className="botao leve" onClick={() => ir('/manual')}>
+        📖 Como usar
+      </button>
       {/* Sem mostrar o nome na tela: o celular pode estar sendo usado por outra pessoa. */}
       <button className="botao leve" onClick={trocarNome}>
         Trocar nome

@@ -6,6 +6,7 @@ import Estoque from './screens/Estoque'
 import Etiqueta from './screens/Etiqueta'
 import Inicio from './screens/Inicio'
 import ItemDetalhe from './screens/ItemDetalhe'
+import Manual from './screens/Manual'
 import NovoItem from './screens/NovoItem'
 import Painel from './screens/Painel'
 import Saida from './screens/Saida'
@@ -16,6 +17,7 @@ export default function App() {
   const [itens, setItens] = useState<Item[] | null>(null)
   const [erro, setErro] = useState('')
   const [operador, setOperador] = useState(() => lembrado('operador'))
+  const [manualVisto, setManualVisto] = useState(() => lembrado('manualVisto') === '1')
   // undefined = ainda conferindo se este aparelho já entrou com a senha
   const [logado, setLogado] = useState<boolean | undefined>(undefined)
   const [online, setOnline] = useState(navigator.onLine)
@@ -43,6 +45,14 @@ export default function App() {
   if (!store || logado === undefined) return <Mensagem>Carregando…</Mensagem>
   if (!logado) return <PedeSenha store={store} />
   if (!operador) return <PerguntaNome onPronto={(n) => (lembrar('operador', n), setOperador(n))} />
+  // Primeira vez neste aparelho: mostra o manual antes de tudo.
+  if (!manualVisto) {
+    return (
+      <main className="conteudo">
+        <Manual onPronto={() => (lembrar('manualVisto', '1'), setManualVisto(true))} />
+      </main>
+    )
+  }
   if (!itens) return <Mensagem>Carregando…</Mensagem>
 
   const [tela, id] = rota.partes
@@ -76,6 +86,8 @@ export default function App() {
           <Saida id={id} />
         ) : tela === 'etiqueta' && id ? (
           <Etiqueta ids={id.split(',')} />
+        ) : tela === 'manual' ? (
+          <Manual />
         ) : tela === 'painel' ? (
           <Painel />
         ) : (

@@ -794,6 +794,74 @@ input:focus {
   text-transform: uppercase;
 }
 
+/* ---------- Manual ---------- */
+
+.manual h2 {
+  margin-top: 1.4rem;
+}
+
+.manual-passos {
+  list-style: none;
+  counter-reset: passo;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.manual-passos li {
+  counter-increment: passo;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem 0.9rem 0.8rem 3rem;
+  margin-bottom: 0.6rem;
+  background: var(--papel);
+  border: 2px solid var(--linha);
+  border-radius: var(--raio);
+}
+
+.manual-passos li::before {
+  content: counter(passo);
+  position: absolute;
+  left: 0.8rem;
+  top: 0.8rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: grid;
+  place-items: center;
+}
+
+.manual-passos span {
+  color: var(--fraco);
+  font-size: 0.95rem;
+}
+
+.manual-estados {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+}
+
+.manual-estados li {
+  padding: 0.35rem 0 0.35rem 0.8rem;
+  border-left: 5px solid var(--cor);
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.manual-estados strong {
+  margin-right: 0.3rem;
+}
+
+.manual .botao {
+  margin-top: 1.2rem;
+}
+
 @media print {
   .topo,
   .nao-imprimir {
@@ -811,9 +879,20 @@ input:focus {
     grid-template-columns: repeat(3, 1fr);
     margin: 0;
   }
-  .etiqueta {
+  .etiqueta,
+  .manual-passos li::before,
+  .manual-estados li {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  /* Manual impresso cabe em uma folha A4 (rem segue a fonte da raiz) */
+  :root:has(.manual) {
+    font-size: 12px;
+  }
+  .manual-passos li {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    margin-bottom: 0.35rem;
   }
 }
 
