@@ -909,3 +909,16 @@ input:focus {
   align-self: flex-start;
   margin-top: 0.2rem;
 }
+
+/* ---------- Material parecido ---------- */
+
+.parecido {
+  margin: 0.8rem 0;
+  padding: 0.6rem;
+  border-radius: var(--raio);
+  background: var(--verde-claro);
+}
+
+.parecido .botao {
+  margin-top: 0.5rem;
+}

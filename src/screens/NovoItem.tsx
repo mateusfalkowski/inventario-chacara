@@ -4,13 +4,13 @@
 // O destino na chegada é pedido da Equipe 3 (classificar e destinar na recepção).
 import { useState } from 'react'
 import { ir, lembrado, lembrar, useApp } from '../app-context'
-import { Chips, Contador } from '../components'
+import { CartaoItem, Chips, Contador } from '../components'
 import { CATEGORIAS, DESTINOS, ESTADOS, LOCAIS, UNIDADES, categoria, destino } from '../config'
 import { prepararFoto } from '../lib/imagem'
-import { novoCodigo, qtd } from '../lib/util'
+import { novoCodigo, qtd, semAcento } from '../lib/util'
 import type { EstadoId, Item } from '../types'
 
-type Passo = 'foto' | 'categoria' | 'estado' | 'destino' | 'detalhes' | 'pronto'
+type Passo = 'foto' | 'categoria' | 'estado' | 'destino' | 'detalhes' | 'parecido' | 'pronto'
 const PASSOS: Passo[] = ['foto', 'categoria', 'estado', 'destino', 'detalhes']
 
 export default function NovoItem() {
@@ -27,6 +27,9 @@ export default function NovoItem() {
   const [origem, setOrigem] = useState(() => lembrado('ultimaOrigem'))
   const [descricao, setDescricao] = useState('')
   const [salvo, setSalvo] = useState<Item | null>(null)
+  // true = em vez de criar um item novo, somou a quantidade num que já existia
+  const [somado, setSomado] = useState(false)
+  const [parecidos, setParecidos] = useState<Item[]>([])
   // "Cadastrar outro igual": categoria já escolhida, então a foto pula direto para o estado.
   const depoisDaFoto: Passo = cat ? 'estado' : 'categoria'
 
@@ -44,6 +47,38 @@ export default function NovoItem() {
     } finally {
       setProcessando(false)
     }
+  }
+
+  // Com várias pessoas cadastrando, o erro mais comum é o mesmo material entrar
+  // duas vezes. Antes de criar, procura algo igual no mesmo lugar e pergunta.
+  function conferirParecidos() {
+    if (!cat || !est || quantidade <= 0) return
+    const achados = itens
+      .filter(
+        (i) =>
+          i.quantidade > 0 &&
+          i.categoria === cat &&
+          i.estado === est &&
+          i.local === local &&
+          i.unidade === unidade &&
+          descricaoParecida(i.descricao, descricao),
+      )
+      .sort((a, b) => b.atualizadoEm - a.atualizadoEm)
+      .slice(0, 3)
+    if (achados.length) {
+      setParecidos(achados)
+      setPasso('parecido')
+    } else {
+      salvar()
+    }
+  }
+
+  function somarEm(item: Item) {
+    const agora = Date.now()
+    store.movimentar(item.id, { tipo: 'entrada', quantidade, em: agora, por: operador })
+    setSalvo({ ...item, quantidade: item.quantidade + quantidade })
+    setSomado(true)
+    setPasso('pronto')
   }
 
   function salvar() {
@@ -72,6 +107,7 @@ export default function NovoItem() {
     lembrar('ultimoLocal', local)
     lembrar('ultimaOrigem', origem.trim())
     setSalvo(item)
+    setSomado(false)
     setPasso('pronto')
   }
 
@@ -98,8 +134,8 @@ export default function NovoItem() {
     return (
       <div className="pronto">
         <div className="pronto-check">✓</div>
-        <h1>Material cadastrado!</h1>
-        <p>Escreva ou cole este código no material:</p>
+        <h1>{somado ? 'Quantidade somada!' : 'Material cadastrado!'}</h1>
+        <p>{somado ? 'Este material já tem código. Use o mesmo:' : 'Escreva ou cole este código no material:'}</p>
         <p className="codigo-grande">{salvo.id}</p>
         <p className="fraco">
           {categoria(salvo.categoria).nome} · {qtd(salvo.quantidade, salvo.unidade)} · {salvo.local}
@@ -117,6 +153,32 @@ export default function NovoItem() {
         </button>
         <button className="botao leve" onClick={() => ir('/')}>
           Voltar ao início
+        </button>
+      </div>
+    )
+  }
+
+  if (passo === 'parecido') {
+    return (
+      <div className="cadastro">
+        <h1>Já tem algo parecido no estoque</h1>
+        <p className="fraco">
+          Mesmo tipo, estado e local. Se for o mesmo material, é só somar {qtd(quantidade, unidade)} nele.
+        </p>
+        {parecidos.map((i) => (
+          <div key={i.id} className="parecido">
+            {/* Só para mostrar: abrir a ficha aqui perderia o cadastro em andamento. */}
+            <CartaoItem item={i} onClick={() => {}} />
+            <button className="botao principal" onClick={() => somarEm(i)}>
+              É este: somar {qtd(quantidade, unidade)}
+            </button>
+          </div>
+        ))}
+        <button className="botao" onClick={salvar}>
+          Não, é outro material: cadastrar novo
+        </button>
+        <button className="botao leve" onClick={() => setPasso('detalhes')}>
+          ‹ Voltar
         </button>
       </div>
     )
@@ -289,7 +351,7 @@ export default function NovoItem() {
             ))}
           </datalist>
 
-          <button className="botao principal grande" onClick={salvar} disabled={quantidade <= 0}>
+          <button className="botao principal grande" onClick={conferirParecidos} disabled={quantidade <= 0}>
             ✓ Salvar material
           </button>
           <button className="botao leve" onClick={voltarPasso}>
@@ -299,4 +361,14 @@ export default function NovoItem() {
       )}
     </div>
   )
+}
+
+/** Descrições "batem" se uma delas está vazia ou se metade das palavras coincide. */
+function descricaoParecida(a: string, b: string) {
+  const palavras = (s: string) => new Set(semAcento(s).split(/[^a-z0-9]+/).filter((p) => p.length >= 2))
+  const pa = palavras(a)
+  const pb = palavras(b)
+  if (!pa.size || !pb.size) return true
+  const comuns = [...pa].filter((p) => pb.has(p)).length
+  return comuns / Math.min(pa.size, pb.size) >= 0.5
 }
