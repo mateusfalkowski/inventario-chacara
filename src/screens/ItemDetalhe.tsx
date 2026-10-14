@@ -46,28 +46,8 @@ export default function ItemDetalhe({ id }: { id: string }) {
       <h1>{tituloItem(item)}</h1>
       <p className="linha-info">
         <SeloEstado id={item.estado} /> <span>{cat.icone} {cat.nome}</span>
+        <strong>{esgotado ? 'Saiu tudo' : qtd(item.quantidade, item.unidade)}</strong>
       </p>
-
-      <dl className="ficha">
-        <dt>No estoque</dt>
-        <dd>{esgotado ? 'Saiu tudo' : qtd(item.quantidade, item.unidade)}</dd>
-        <dt>Local</dt>
-        <dd>{item.local || '—'}</dd>
-        <dt>Destino previsto</dt>
-        <dd>{destino(item.destinoPrevisto ?? '')?.nome ?? 'Ainda não definido'}</dd>
-        <dt>Obra de origem</dt>
-        <dd>{item.origem || '—'}</dd>
-        <dt>Cadastrado</dt>
-        <dd>
-          {dataCurta(item.criadoEm)} por {item.criadoPor}
-        </dd>
-        {!esgotado && parado >= 30 && (
-          <>
-            <dt>Parado há</dt>
-            <dd>{parado} dias</dd>
-          </>
-        )}
-      </dl>
 
       {!esgotado && (
         <button className="botao principal grande" onClick={() => ir(`/saida/${item.id}`)}>
@@ -101,6 +81,28 @@ export default function ItemDetalhe({ id }: { id: string }) {
           </button>
         </div>
       )}
+
+      {/* Detalhes depois dos botões: no celular a ação principal aparece sem rolar. */}
+      <dl className="ficha">
+        <dt>No estoque</dt>
+        <dd>{esgotado ? 'Saiu tudo' : qtd(item.quantidade, item.unidade)}</dd>
+        <dt>Local</dt>
+        <dd>{item.local || '—'}</dd>
+        <dt>Destino previsto</dt>
+        <dd>{destino(item.destinoPrevisto ?? '')?.nome ?? 'Ainda não definido'}</dd>
+        <dt>Obra de origem</dt>
+        <dd>{item.origem || '—'}</dd>
+        <dt>Cadastrado</dt>
+        <dd>
+          {dataCurta(item.criadoEm)} por {item.criadoPor}
+        </dd>
+        {!esgotado && parado >= 30 && (
+          <>
+            <dt>Parado há</dt>
+            <dd>{parado} dias</dd>
+          </>
+        )}
+      </dl>
 
       <h2>Histórico</h2>
       <ul className="historico">

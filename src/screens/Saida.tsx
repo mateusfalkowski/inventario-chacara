@@ -89,9 +89,11 @@ export default function Saida({ id }: { id: string }) {
         maxLength={120}
       />
 
-      <button className="botao principal grande" disabled={!valido} onClick={confirmar}>
-        ✓ Confirmar saída
-      </button>
+      <div className="acao-fixa">
+        <button className="botao principal grande" disabled={!valido} onClick={confirmar}>
+          ✓ Confirmar saída
+        </button>
+      </div>
     </div>
   )
 }

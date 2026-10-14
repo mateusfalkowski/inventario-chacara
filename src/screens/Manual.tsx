@@ -1,13 +1,18 @@
-// Manual curto de uso. Aparece sozinho na primeira vez que alguém entra num
-// celular novo e depois fica em "Como usar" na tela inicial. Impresso, cabe em
-// uma folha: é a base do manual de 1 página do entregável.
+// Manual curto de uso, em "Como usar" na tela inicial. O treino fica no topo
+// (na primeira vez ele é oferecido num popup). Impresso, cabe em uma folha:
+// é a base do manual de 1 página do entregável.
 import { ESTADOS } from '../config'
 
-export default function Manual({ onPronto }: { onPronto?: () => void }) {
+export default function Manual() {
   return (
     <div className="manual">
       <h1>Como usar o inventário</h1>
-      <p className="fraco">Leva 1 minuto. Dá para ver de novo em "Como usar", na tela inicial.</p>
+      <div className="nao-imprimir manual-treino">
+        <button className="botao principal grande" onClick={() => (location.hash = '/treino')}>
+          🎯 Treinar agora (2 minutos)
+        </button>
+        <p className="fraco centro">Aprenda fazendo: um cadastro e uma saída de mentira, com dicas na tela.</p>
+      </div>
 
       <ol className="manual-passos">
         <li>
@@ -60,19 +65,9 @@ export default function Manual({ onPronto }: { onPronto?: () => void }) {
       <p>Material inteiro na foto, com luz de dia, fundo limpo. Se tiver marca ou medida escrita, mostre.</p>
 
       <div className="nao-imprimir">
-        <button className="botao principal grande" onClick={() => (location.hash = '/treino')}>
-          🎯 Treinar agora (2 minutos)
+        <button className="botao" onClick={() => window.print()}>
+          🖨️ Imprimir esta página
         </button>
-        <p className="fraco centro">Você faz um cadastro e uma saída de mentira, com dicas na tela. Nada é salvo.</p>
-        {onPronto ? (
-          <button className="botao leve" onClick={onPronto}>
-            Pular, já sei usar
-          </button>
-        ) : (
-          <button className="botao" onClick={() => window.print()}>
-            🖨️ Imprimir esta página
-          </button>
-        )}
       </div>
     </div>
   )

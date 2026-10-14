@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { definirPrefixo, ir, lembrado, lembrar, useRota } from './app-context'
 import { criarStore, type Store } from './data/store'
-import Manual from './screens/Manual'
 import Moldura from './Moldura'
 import Treino from './screens/Treino'
 import type { Item } from './types'
@@ -47,22 +46,38 @@ export default function App() {
     location.hash = '/'
   }
 
-  // Primeira vez neste aparelho: mostra o manual antes de tudo (dele dá para ir ao treino).
-  if (!manualVisto && !emTreino) {
-    return (
-      <main className="conteudo">
-        <Manual onPronto={concluirManual} />
-      </main>
-    )
-  }
-
   definirPrefixo(emTreino ? '/treino' : '')
   const comum = { operador, online, trocarNome: () => setOperador('') }
   if (emTreino) {
     return <Treino {...comum} partes={rota.partes.slice(1)} busca={rota.busca} onSair={concluirManual} />
   }
   if (!itens) return <Mensagem>Carregando…</Mensagem>
-  return <Moldura {...comum} store={store} itens={itens} partes={rota.partes} busca={rota.busca} />
+  return (
+    <>
+      <Moldura {...comum} store={store} itens={itens} partes={rota.partes} busca={rota.busca} />
+      {/* Primeira vez neste aparelho: convite para o treino por cima da tela inicial. */}
+      {!manualVisto && <ConviteTreino onPular={concluirManual} />}
+    </>
+  )
+}
+
+function ConviteTreino({ onPular }: { onPular: () => void }) {
+  return (
+    <div className="popup-fundo" role="dialog" aria-modal="true" aria-labelledby="convite-titulo">
+      <div className="popup">
+        <div className="popup-icone">🎯</div>
+        <h2 id="convite-titulo">Primeira vez aqui?</h2>
+        <p>Faça um treino de 2 minutos: você cadastra e dá saída num material de mentira, com dicas na tela.</p>
+        <button className="botao principal grande" autoFocus onClick={() => (location.hash = '/treino')}>
+          ▶ Começar tutorial
+        </button>
+        <button className="botao leve" onClick={onPular}>
+          Agora não
+        </button>
+        <p className="fraco popup-nota">Dá para fazer depois em "Como usar".</p>
+      </div>
+    </div>
+  )
 }
 
 function Mensagem({ children }: { children: React.ReactNode }) {

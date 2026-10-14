@@ -33,11 +33,6 @@ export default function Treino({ partes, onSair, ...resto }: Props) {
 
   const guia = (
     <section className={`guia${passo === 4 ? ' guia-fim' : ''}`} aria-live="polite">
-      <ol className="guia-progresso" aria-label={`Passo ${Math.min(passo, 3)} de 3`}>
-        {[1, 2, 3].map((n) => (
-          <li key={n} className={n < passo ? 'feito' : n === passo ? 'atual' : ''} />
-        ))}
-      </ol>
       {passo === 4 ? (
         <>
           <strong>🎉 Pronto! Você já sabe o básico.</strong>
@@ -51,13 +46,15 @@ export default function Treino({ partes, onSair, ...resto }: Props) {
         </>
       ) : (
         <>
-          <strong>
-            Treino {passo}/3 · {TITULOS[passo]}
-          </strong>
+          <div className="guia-topo">
+            <strong>
+              Treino {passo}/3 · {TITULOS[passo]}
+            </strong>
+            <button className="link" onClick={onSair}>
+              Sair
+            </button>
+          </div>
           <p>{dica(passo, tela)}</p>
-          <button className="link" onClick={onSair}>
-            Sair do treino
-          </button>
         </>
       )}
     </section>
@@ -81,8 +78,8 @@ function dica(passo: number, tela: string | undefined) {
   if (passo === 2) {
     if (tela === 'estoque') return 'Toque no material que você acabou de cadastrar.'
     return tela
-      ? 'Volte ao início e toque em "Ver estoque". É ali que se encontra qualquer material.'
-      : 'Toque em "Ver estoque". É ali que se encontra qualquer material.'
+      ? 'Toque em "‹ Voltar", lá em cima, e depois em "Estoque". É ali que se encontra qualquer material.'
+      : 'Toque em "Estoque". É ali que se encontra qualquer material.'
   }
   return tela === 'saida'
     ? 'Escolha para onde foi, quanto saiu e toque em "Confirmar saída".'

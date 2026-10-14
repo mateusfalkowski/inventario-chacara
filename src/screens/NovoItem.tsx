@@ -351,9 +351,12 @@ export default function NovoItem() {
             ))}
           </datalist>
 
-          <button className="botao principal grande" onClick={conferirParecidos} disabled={quantidade <= 0}>
-            ✓ Salvar material
-          </button>
+          {/* Preso no rodapé: em celular pequeno o botão fica sempre à vista, sem rolar. */}
+          <div className="acao-fixa">
+            <button className="botao principal grande" onClick={conferirParecidos} disabled={quantidade <= 0}>
+              ✓ Salvar material
+            </button>
+          </div>
           <button className="botao leve" onClick={voltarPasso}>
             ‹ Voltar
           </button>

@@ -957,25 +957,181 @@ input:focus {
   background: var(--verde-claro);
 }
 
-.guia-progresso {
+
+/* ---------- Início compacto ---------- */
+
+.atalhos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.atalho {
   display: flex;
-  gap: 0.35rem;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 0.5rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.9rem 0.3rem 0.8rem;
+  border: 2px solid var(--linha);
+  border-radius: var(--raio);
+  background: var(--papel);
+  text-align: center;
+  cursor: pointer;
 }
 
-.guia-progresso li {
-  flex: 1;
-  height: 5px;
-  border-radius: 3px;
-  background: rgb(0 0 0 / 0.12);
+.atalho-icone {
+  font-size: 1.8rem;
+  line-height: 1.1;
 }
 
-.guia-progresso li.feito {
-  background: var(--verde);
+.atalho strong {
+  font-size: 1rem;
 }
 
-.guia-progresso li.atual {
-  background: #c27c0e;
+.atalho small {
+  color: var(--fraco);
+  font-size: 0.78rem;
+}
+
+.rodape-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin-top: 1.4rem;
+}
+
+.rodape-links .link {
+  font-size: 0.92rem;
+  padding: 0.4rem 0.2rem;
+}
+
+/* ---------- Popup ---------- */
+
+.popup-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(20 30 22 / 0.55);
+}
+
+.popup {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.4rem 1.2rem 1rem;
+  border-radius: 18px;
+  background: var(--papel);
+  text-align: center;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+}
+
+.popup h2 {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 1.35rem;
+}
+
+.popup p {
+  margin: 0 0 0.6rem;
+}
+
+.popup-icone {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.popup-nota {
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0;
+}
+
+.manual-treino .botao {
+  margin-top: 0.2rem;
+}
+
+/* ---------- Menos rolagem no celular ---------- */
+
+/* Botão principal de um formulário longo fica preso no rodapé da tela. */
+.acao-fixa {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  margin: 0 -1rem;
+  padding: 0.2rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.7rem);
+  background: linear-gradient(to bottom, rgb(244 241 234 / 0), var(--fundo) 30%);
+}
+
+/* Opções de categoria/destino em 3 colunas e mais baixas: 9 categorias cabem em 3 linhas. */
+@media (max-width: 520px) {
+  .grade-opcoes {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+  }
+  .opcao {
+    min-height: 5.2rem;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+  .opcao-icone {
+    font-size: 1.7rem;
+  }
+}
+
+/* Guia do treino enxuto: uma linha de título, a dica e o link de sair ao lado. */
+.guia {
+  padding: 0.55rem 0.8rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.guia strong {
+  font-size: 0.98rem;
+}
+
+.guia p {
+  margin: 0.15rem 0 0.1rem;
+}
+
+
+.guia .link {
+  font-size: 0.82rem;
+}
+
+/* Ficha: foto menor no celular para "Dar saída" aparecer sem rolar. */
+@media (max-width: 520px) {
+  .foto-grande {
+    max-height: 34vh;
+  }
+  .foto-grande.vazia {
+    height: 18vh;
+    font-size: 3.5rem;
+  }
+  .opcao-estado {
+    padding: 0.7rem 0.9rem 0.7rem 1.1rem;
+  }
+  .pronto-check {
+    width: 3.6rem;
+    height: 3.6rem;
+    line-height: 3.6rem;
+    font-size: 2rem;
+  }
+}
+
+.guia-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.linha-info {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .foto-grande {
+    max-height: 28vh;
+  }
 }

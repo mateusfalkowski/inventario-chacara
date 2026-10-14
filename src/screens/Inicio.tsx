@@ -1,5 +1,7 @@
 import { ir, useApp } from '../app-context'
 
+// Tela inicial pensada para caber inteira no celular, sem rolar: o botão
+// principal grande, as outras três ações lado a lado e o resto em links pequenos.
 export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
   const { itens, operador, store } = useApp()
   const emEstoque = itens.filter((i) => i.quantidade > 0).length
@@ -16,29 +18,23 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         </span>
       </button>
 
-      <button className="bloco" onClick={() => ir('/estoque?saida')}>
-        <span className="bloco-icone">📤</span>
-        <span>
+      <div className="atalhos">
+        <button className="atalho" onClick={() => ir('/estoque?saida')}>
+          <span className="atalho-icone">📤</span>
           <strong>Dar saída</strong>
-          <small>Material vendido, doado ou descartado</small>
-        </span>
-      </button>
-
-      <button className="bloco" onClick={() => ir('/estoque')}>
-        <span className="bloco-icone">📋</span>
-        <span>
-          <strong>Ver estoque</strong>
-          <small>{emEstoque === 1 ? '1 item guardado' : `${emEstoque} itens guardados`}</small>
-        </span>
-      </button>
-
-      <button className="bloco" onClick={() => ir('/painel')}>
-        <span className="bloco-icone">📊</span>
-        <span>
-          <strong>Painel e relatórios</strong>
-          <small>Resumo, itens parados e exportar planilha</small>
-        </span>
-      </button>
+          <small>Vendido, doado…</small>
+        </button>
+        <button className="atalho" onClick={() => ir('/estoque')}>
+          <span className="atalho-icone">📋</span>
+          <strong>Estoque</strong>
+          <small>{emEstoque === 1 ? '1 item' : `${emEstoque} itens`}</small>
+        </button>
+        <button className="atalho" onClick={() => ir('/painel')}>
+          <span className="atalho-icone">📊</span>
+          <strong>Painel</strong>
+          <small>Resumo e planilha</small>
+        </button>
+      </div>
 
       {meusHoje > 0 && (
         <p className="nota-dia">
@@ -46,26 +42,27 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         </p>
       )}
 
-      <button className="botao leve" onClick={() => ir('/manual')}>
-        📖 Como usar
-      </button>
-      {/* Sem mostrar o nome na tela: o celular pode estar sendo usado por outra pessoa. */}
-      <button className="botao leve" onClick={trocarNome}>
-        Trocar nome
-      </button>
-      <button
-        className="botao leve"
-        onClick={() => {
-          if (confirm('Sair deste celular? Vai precisar da senha da equipe para entrar de novo.')) void store.sair()
-        }}
-      >
-        Sair deste celular
-      </button>
+      <nav className="rodape-links">
+        <button className="link" onClick={() => ir('/manual')}>
+          📖 Como usar
+        </button>
+        {/* Sem mostrar o nome na tela: o celular pode estar sendo usado por outra pessoa. */}
+        <button className="link" onClick={trocarNome}>
+          Trocar nome
+        </button>
+        <button
+          className="link"
+          onClick={() => {
+            if (confirm('Sair deste celular? Vai precisar da senha da equipe para entrar de novo.')) void store.sair()
+          }}
+        >
+          Sair
+        </button>
+      </nav>
 
       {store.modo === 'local' && (
         <p className="aviso">
-          <strong>Modo demonstração:</strong> os dados ficam salvos só neste aparelho. Configure o Firebase para
-          compartilhar entre celulares (veja o README).
+          <strong>Modo demonstração:</strong> os dados ficam salvos só neste aparelho.
         </p>
       )}
     </div>
