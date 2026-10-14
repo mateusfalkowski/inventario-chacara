@@ -1,7 +1,7 @@
 // Corrigir um cadastro feito errado. Quantidade não é sobrescrita: vira um
 // movimento de "correção" no histórico, para dar para conferir depois.
 import { useState } from 'react'
-import { useApp } from '../app-context'
+import { irSubstituindo, useApp } from '../app-context'
 import { Chips, Contador } from '../components'
 import { CATEGORIAS, DESTINOS, ESTADOS, LOCAIS, UNIDADES } from '../config'
 import type { EstadoId, Item } from '../types'
@@ -50,7 +50,7 @@ function Formulario({ item }: { item: Item }) {
       store.movimentar(item.id, { tipo: 'ajuste', quantidade: diferenca, em: agora, por: operador })
     }
     // replace: o "Voltar" do item não reabre o formulário.
-    location.replace(`#/item/${item.id}`)
+    irSubstituindo(`/item/${item.id}`)
   }
 
   return (

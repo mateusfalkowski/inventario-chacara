@@ -37,8 +37,21 @@ export function useRota() {
   return rota
 }
 
+// No modo treino as mesmas telas rodam sob #/treino/..., com dados de mentira.
+// As telas continuam chamando ir('/item/X'); o prefixo mantém a navegação
+// dentro do treino. O App define o prefixo a cada render conforme a rota.
+let prefixo = ''
+export const definirPrefixo = (p: string) => {
+  prefixo = p
+}
+
 export const ir = (caminho: string) => {
-  location.hash = caminho
+  location.hash = prefixo + caminho
+}
+
+/** Como `ir`, mas troca a entrada atual do histórico (o "Voltar" não reabre um formulário já enviado). */
+export const irSubstituindo = (caminho: string) => {
+  location.replace(`#${prefixo}${caminho}`)
 }
 
 // ---- Preferências deste aparelho (nome de quem usa, último local/obra).

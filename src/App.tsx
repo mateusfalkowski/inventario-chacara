@@ -1,15 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Ctx, ir, lembrado, lembrar, useRota } from './app-context'
+import { definirPrefixo, ir, lembrado, lembrar, useRota } from './app-context'
 import { criarStore, type Store } from './data/store'
-import Editar from './screens/Editar'
-import Estoque from './screens/Estoque'
-import Etiqueta from './screens/Etiqueta'
-import Inicio from './screens/Inicio'
-import ItemDetalhe from './screens/ItemDetalhe'
 import Manual from './screens/Manual'
-import NovoItem from './screens/NovoItem'
-import Painel from './screens/Painel'
-import Saida from './screens/Saida'
+import Moldura from './Moldura'
+import Treino from './screens/Treino'
 import type { Item } from './types'
 
 export default function App() {
@@ -45,57 +39,30 @@ export default function App() {
   if (!store || logado === undefined) return <Mensagem>Carregando…</Mensagem>
   if (!logado) return <PedeSenha store={store} />
   if (!operador) return <PerguntaNome onPronto={(n) => (lembrar('operador', n), setOperador(n))} />
-  // Primeira vez neste aparelho: mostra o manual antes de tudo.
-  if (!manualVisto) {
+  const emTreino = rota.partes[0] === 'treino'
+  // Terminar (ou pular) o manual/treino da primeira vez libera o app de verdade.
+  const concluirManual = () => {
+    lembrar('manualVisto', '1')
+    setManualVisto(true)
+    location.hash = '/'
+  }
+
+  // Primeira vez neste aparelho: mostra o manual antes de tudo (dele dá para ir ao treino).
+  if (!manualVisto && !emTreino) {
     return (
       <main className="conteudo">
-        <Manual onPronto={() => (lembrar('manualVisto', '1'), setManualVisto(true))} />
+        <Manual onPronto={concluirManual} />
       </main>
     )
   }
+
+  definirPrefixo(emTreino ? '/treino' : '')
+  const comum = { operador, online, trocarNome: () => setOperador('') }
+  if (emTreino) {
+    return <Treino {...comum} partes={rota.partes.slice(1)} busca={rota.busca} onSair={concluirManual} />
+  }
   if (!itens) return <Mensagem>Carregando…</Mensagem>
-
-  const [tela, id] = rota.partes
-  const naInicio = !tela
-
-  return (
-    <Ctx.Provider value={{ store, itens, operador }}>
-      <header className="topo">
-        {naInicio ? (
-          <span className="marca">Inventário Chácara</span>
-        ) : (
-          <button className="voltar" onClick={() => (history.length > 1 ? history.back() : ir('/'))} aria-label="Voltar">
-            ‹ Voltar
-          </button>
-        )}
-        <span className="topo-status">
-          {!online && <span className="selo selo-offline">Sem internet · salvando no aparelho</span>}
-          {store.modo === 'local' && <span className="selo">Modo demonstração</span>}
-        </span>
-      </header>
-      <main className="conteudo">
-        {tela === 'novo' ? (
-          <NovoItem />
-        ) : tela === 'estoque' ? (
-          <Estoque modoSaida={rota.busca.has('saida')} />
-        ) : tela === 'item' && id ? (
-          <ItemDetalhe id={id} />
-        ) : tela === 'editar' && id ? (
-          <Editar id={id} />
-        ) : tela === 'saida' && id ? (
-          <Saida id={id} />
-        ) : tela === 'etiqueta' && id ? (
-          <Etiqueta ids={id.split(',')} />
-        ) : tela === 'manual' ? (
-          <Manual />
-        ) : tela === 'painel' ? (
-          <Painel />
-        ) : (
-          <Inicio trocarNome={() => setOperador('')} />
-        )}
-      </main>
-    </Ctx.Provider>
-  )
+  return <Moldura {...comum} store={store} itens={itens} partes={rota.partes} busca={rota.busca} />
 }
 
 function Mensagem({ children }: { children: React.ReactNode }) {

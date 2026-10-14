@@ -60,9 +60,13 @@ export default function Manual({ onPronto }: { onPronto?: () => void }) {
       <p>Material inteiro na foto, com luz de dia, fundo limpo. Se tiver marca ou medida escrita, mostre.</p>
 
       <div className="nao-imprimir">
+        <button className="botao principal grande" onClick={() => (location.hash = '/treino')}>
+          🎯 Treinar agora (2 minutos)
+        </button>
+        <p className="fraco centro">Você faz um cadastro e uma saída de mentira, com dicas na tela. Nada é salvo.</p>
         {onPronto ? (
-          <button className="botao principal grande" onClick={onPronto}>
-            Entendi, começar
+          <button className="botao leve" onClick={onPronto}>
+            Pular, já sei usar
           </button>
         ) : (
           <button className="botao" onClick={() => window.print()}>

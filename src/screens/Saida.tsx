@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ir, useApp } from '../app-context'
+import { ir, irSubstituindo, useApp } from '../app-context'
 import { Contador, Miniatura, SeloEstado, tituloItem } from '../components'
 import { DESTINOS } from '../config'
 import { qtd } from '../lib/util'
@@ -46,7 +46,7 @@ export default function Saida({ id }: { id: string }) {
       por: operador,
     })
     // replace: o "Voltar" do item não reabre o formulário de saída.
-    location.replace(`#/item/${item.id}`)
+    irSubstituindo(`/item/${item.id}`)
   }
 
   return (

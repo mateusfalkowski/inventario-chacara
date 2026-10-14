@@ -922,3 +922,60 @@ input:focus {
 .parecido .botao {
   margin-top: 0.5rem;
 }
+
+/* ---------- Treino ---------- */
+
+.selo-treino {
+  background: #c27c0e;
+}
+
+.centro {
+  text-align: center;
+}
+
+.guia {
+  max-width: 560px;
+  margin: 0.8rem auto 0;
+  padding: 0.8rem 1rem 0.7rem;
+  border: 2px solid #c27c0e;
+  border-radius: var(--raio);
+  background: var(--alerta);
+  width: calc(100% - 2rem);
+}
+
+.guia strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.guia p {
+  margin: 0.3rem 0 0.4rem;
+}
+
+.guia.guia-fim {
+  border-color: var(--verde);
+  background: var(--verde-claro);
+}
+
+.guia-progresso {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+}
+
+.guia-progresso li {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.12);
+}
+
+.guia-progresso li.feito {
+  background: var(--verde);
+}
+
+.guia-progresso li.atual {
+  background: #c27c0e;
+}

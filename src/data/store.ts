@@ -5,7 +5,7 @@ export const variacao = (m: Movimento) => (m.tipo === 'saida' ? -m.quantidade : 
 
 export interface Store {
   /** 'local' = modo demonstração, salva só neste aparelho */
-  modo: 'local' | 'firebase'
+  modo: 'local' | 'firebase' | 'treino'
   /** Chama `cb` com a lista inteira sempre que algo mudar (inclusive mudanças offline). */
   observar(cb: (itens: Item[]) => void): () => void
   /** Não espera o servidor: offline, a gravação fica na fila e sobe quando voltar o sinal. */
