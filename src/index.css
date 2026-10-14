@@ -1135,3 +1135,301 @@ input:focus {
     max-height: 28vh;
   }
 }
+
+/* =====================================================================
+   Botões — acabamento
+   Sombra suave no lugar da borda grossa, ícone num quadrado colorido,
+   efeito de "apertar" ao tocar (confirma o toque no celular) e contorno
+   visível no foco do teclado. Fica no fim do arquivo e sobrepõe o resto.
+   ===================================================================== */
+
+:root {
+  --verde-escuro: #244a2e;
+  --borda-suave: #e2dccd;
+  --sombra-1: 0 1px 2px rgb(31 42 34 / 0.06), 0 2px 8px rgb(31 42 34 / 0.06);
+  --sombra-2: 0 2px 4px rgb(31 42 34 / 0.08), 0 6px 18px rgb(31 42 34 / 0.1);
+  --sombra-verde: 0 2px 4px rgb(36 74 46 / 0.2), 0 8px 20px rgb(36 74 46 / 0.25);
+}
+
+.botao,
+.bloco,
+.atalho,
+.opcao,
+.opcao-estado,
+.cartao-item,
+.chips button,
+.contador button {
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Apertar: encolhe um pouco e a sombra baixa. */
+.botao:not(:disabled):active,
+.bloco:active,
+.atalho:active,
+.opcao:active,
+.opcao-estado:active,
+.cartao-item:active,
+.chips button:active,
+.contador button:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+:is(.botao, .bloco, .atalho, .opcao, .opcao-estado, .cartao-item, .chips button, .contador button, .link, .voltar):focus-visible {
+  outline: 3px solid #e0a43a;
+  outline-offset: 2px;
+}
+
+/* ---- Botão comum e principal ---- */
+
+.botao {
+  border-width: 1.5px;
+  border-radius: 14px;
+  box-shadow: var(--sombra-1);
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.botao.principal {
+  border-color: var(--verde-escuro);
+  background: linear-gradient(180deg, #386b44 0%, var(--verde) 55%, var(--verde-escuro) 100%);
+  box-shadow: var(--sombra-verde), inset 0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+.botao.leve {
+  box-shadow: none;
+}
+
+.botao:disabled {
+  box-shadow: none;
+  filter: grayscale(0.4);
+}
+
+@media (hover: hover) {
+  .botao:not(.principal):not(.leve):not(:disabled):hover {
+    background: var(--verde-claro);
+  }
+  .botao.principal:not(:disabled):hover {
+    filter: brightness(1.07);
+  }
+  :is(.bloco, .atalho, .opcao, .opcao-estado, .cartao-item):hover {
+    box-shadow: var(--sombra-2);
+  }
+}
+
+/* ---- Tela inicial ---- */
+
+.bloco {
+  position: relative;
+  border: 1px solid var(--borda-suave);
+  border-radius: 18px;
+  box-shadow: var(--sombra-1);
+}
+
+.bloco.principal {
+  border: none;
+  background: linear-gradient(135deg, #3a7148 0%, var(--verde) 50%, var(--verde-escuro) 100%);
+  box-shadow: var(--sombra-verde), inset 0 1px 0 rgb(255 255 255 / 0.15);
+  padding-right: 2.6rem;
+}
+
+/* Seta à direita: deixa claro que é um botão, não um cartaz. */
+.bloco.principal::after {
+  content: '›';
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-52%);
+  font-size: 2rem;
+  font-weight: 300;
+  opacity: 0.8;
+}
+
+.bloco-icone {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 14px;
+  font-size: 1.7rem;
+  background: var(--verde-claro);
+}
+
+.bloco.principal .bloco-icone {
+  background: rgb(255 255 255 / 0.16);
+}
+
+.atalho {
+  gap: 0.25rem;
+  border: 1px solid var(--borda-suave);
+  border-radius: 18px;
+  box-shadow: var(--sombra-1);
+  padding: 0.85rem 0.3rem 0.75rem;
+}
+
+.atalho-icone {
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  margin-bottom: 0.15rem;
+  border-radius: 13px;
+  font-size: 1.45rem;
+  line-height: 1;
+  background: var(--verde-claro);
+}
+
+/* Cada atalho com a sua cor: dá para achar pela cor, sem ler. */
+.atalho:nth-child(1) .atalho-icone {
+  background: #fbe9d3;
+}
+.atalho:nth-child(2) .atalho-icone {
+  background: #e1ecf7;
+}
+.atalho:nth-child(3) .atalho-icone {
+  background: #ebe4f5;
+}
+
+.rodape-links .link {
+  text-decoration: none;
+  padding: 0.45rem 0.8rem;
+  border-radius: 99px;
+  background: rgb(31 42 34 / 0.05);
+  color: var(--fraco);
+}
+
+/* ---- Opções do cadastro (categoria, destino) ---- */
+
+.opcao {
+  position: relative;
+  border: 1.5px solid var(--borda-suave);
+  border-radius: 16px;
+  box-shadow: var(--sombra-1);
+}
+
+.opcao-icone {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-bottom: 0.1rem;
+  border-radius: 13px;
+  background: #f3efe5;
+}
+
+.opcao.ativo {
+  border-color: var(--verde);
+  background: var(--verde-claro);
+  box-shadow: 0 0 0 2px var(--verde);
+}
+
+.opcao.ativo .opcao-icone {
+  background: #fff;
+}
+
+/* Selo de "escolhido" no canto. */
+.opcao.ativo::after,
+.opcao-estado.ativo::after {
+  content: '✓';
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.opcao-estado {
+  position: relative;
+  border: 1.5px solid var(--borda-suave);
+  border-left: 10px solid var(--cor);
+  border-radius: 16px;
+  box-shadow: var(--sombra-1);
+}
+
+.opcao-estado.ativo {
+  border-color: var(--cor);
+  box-shadow: 0 0 0 2px var(--cor);
+}
+
+/* ---- Chips (unidade, local, filtros) ---- */
+
+.chips button {
+  border: 1.5px solid var(--borda-suave);
+  background: var(--papel);
+  box-shadow: 0 1px 2px rgb(31 42 34 / 0.05);
+  font-weight: 550;
+}
+
+.chips button.ativo {
+  border-color: var(--verde);
+  background: var(--verde);
+  box-shadow: 0 2px 6px rgb(36 74 46 / 0.3);
+}
+
+.chips button.ativo::before {
+  content: '✓ ';
+  font-weight: 700;
+}
+
+/* ---- Contador (− 1 +) ---- */
+
+.contador button {
+  border: none;
+  border-radius: 14px;
+  background: var(--verde);
+  color: #fff;
+  box-shadow: var(--sombra-verde);
+}
+
+.contador input {
+  border-radius: 14px;
+}
+
+/* ---- Listas de materiais ---- */
+
+.cartao-item {
+  border: 1px solid var(--borda-suave);
+  border-radius: 16px;
+  box-shadow: var(--sombra-1);
+}
+
+/* ---- Topo ---- */
+
+.voltar {
+  padding: 0.35rem 0.8rem 0.35rem 0.55rem;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 0.14);
+}
+
+.voltar:active {
+  background: rgb(255 255 255 / 0.25);
+}
+
+/* Botão secundário no mesmo estilo dos cartões: borda suave em vez de contorno verde. */
+.botao:not(.principal):not(.leve) {
+  border-color: var(--borda-suave);
+  background: var(--papel);
+  color: var(--verde-escuro);
+}
+
+.botoes-lado .botao {
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
