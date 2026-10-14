@@ -933,29 +933,9 @@ input:focus {
   text-align: center;
 }
 
-.guia {
-  max-width: 560px;
-  margin: 0.8rem auto 0;
-  padding: 0.8rem 1rem 0.7rem;
-  border: 2px solid #c27c0e;
-  border-radius: var(--raio);
-  background: var(--alerta);
-  width: calc(100% - 2rem);
-}
 
-.guia strong {
-  display: block;
-  font-size: 1.05rem;
-}
 
-.guia p {
-  margin: 0.3rem 0 0.4rem;
-}
 
-.guia.guia-fim {
-  border-color: var(--verde);
-  background: var(--verde-claro);
-}
 
 
 /* ---------- Início compacto ---------- */
@@ -1080,24 +1060,10 @@ input:focus {
   }
 }
 
-/* Guia do treino enxuto: uma linha de título, a dica e o link de sair ao lado. */
-.guia {
-  padding: 0.55rem 0.8rem 0.5rem;
-  font-size: 0.9rem;
-}
-
-.guia strong {
-  font-size: 0.98rem;
-}
-
-.guia p {
-  margin: 0.15rem 0 0.1rem;
-}
 
 
-.guia .link {
-  font-size: 0.82rem;
-}
+
+
 
 /* Ficha: foto menor no celular para "Dar saída" aparecer sem rolar. */
 @media (max-width: 520px) {
@@ -1119,12 +1085,6 @@ input:focus {
   }
 }
 
-.guia-topo {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.6rem;
-}
 
 .linha-info {
   flex-wrap: wrap;
@@ -1432,4 +1392,123 @@ input:focus {
   gap: 0.15rem;
   font-size: 0.9rem;
   line-height: 1.2;
+}
+
+/* ---------- Holofote do treino ---------- */
+
+.holofote-bloqueio {
+  position: fixed;
+  z-index: 30;
+}
+
+.holofote-anel {
+  position: fixed;
+  z-index: 31;
+  border-radius: 18px;
+  pointer-events: none;
+  /* A sombra gigante é o escuro em volta; o anel amarelo pulsa no alvo. */
+  box-shadow:
+    0 0 0 3px #f2b134,
+    0 0 0 9999px rgb(10 18 12 / 0.68);
+  animation: holofote-pulso 1.6s ease-in-out infinite;
+}
+
+.holofote-anel.cutucado {
+  animation:
+    holofote-cutucao 0.35s ease,
+    holofote-pulso 1.6s ease-in-out 0.35s infinite;
+}
+
+@keyframes holofote-pulso {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px #f2b134,
+      0 0 0 9999px rgb(10 18 12 / 0.68);
+  }
+  50% {
+    box-shadow:
+      0 0 0 7px rgb(242 177 52 / 0.55),
+      0 0 0 9999px rgb(10 18 12 / 0.68);
+  }
+}
+
+/* Tocou fora: o anel balança para mostrar onde é. */
+@keyframes holofote-cutucao {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.holofote-balao {
+  position: fixed;
+  z-index: 32;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(340px, calc(100vw - 2rem));
+  padding: 0.8rem 1rem 0.6rem;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+  animation: holofote-entrar 0.25s ease;
+}
+
+.holofote-balao p {
+  margin: 0.2rem 0 0.35rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.holofote-rotulo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #b06f08;
+}
+
+.holofote-balao .link {
+  font-size: 0.82rem;
+}
+
+/* Setinha apontando para o alvo. */
+.holofote-balao::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.holofote-balao.embaixo::before {
+  top: -7px;
+}
+
+.holofote-balao.em-cima::before {
+  bottom: -7px;
+}
+
+@keyframes holofote-entrar {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holofote-anel,
+  .holofote-anel.cutucado,
+  .holofote-balao {
+    animation: none;
+  }
 }

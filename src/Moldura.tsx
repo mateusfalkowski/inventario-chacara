@@ -19,12 +19,10 @@ interface MolduraProps {
   partes: string[]
   busca: URLSearchParams
   trocarNome: () => void
-  /** Conteúdo fixo acima da tela (o guia do treino) */
-  guia?: React.ReactNode
 }
 
 /** Topo + tela da rota. Usada no app de verdade e no treino (com outro store). */
-export default function Moldura({ store, itens, operador, online, partes, busca, trocarNome, guia }: MolduraProps) {
+export default function Moldura({ store, itens, operador, online, partes, busca, trocarNome }: MolduraProps) {
   const [tela, id] = partes
   return (
     <Ctx.Provider value={{ store, itens, operador }}>
@@ -44,7 +42,6 @@ export default function Moldura({ store, itens, operador, online, partes, busca,
           {store.modo === 'local' && <span className="selo">Modo demonstração</span>}
         </span>
       </header>
-      {guia}
       <main className="conteudo">
         {tela === 'novo' ? (
           <NovoItem />

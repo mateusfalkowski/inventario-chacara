@@ -63,7 +63,7 @@ export default function Saida({ id }: { id: string }) {
       </div>
 
       <h1>Para onde vai?</h1>
-      <div className="grade-opcoes">
+      <div className="grade-opcoes" data-tour="destinos">
         {DESTINOS.map((d) => (
           <button key={d.id} className={`opcao${dest === d.id ? ' ativo' : ''}`} onClick={() => setDest(d.id)}>
             <span className="opcao-icone">{d.icone}</span>
@@ -90,7 +90,7 @@ export default function Saida({ id }: { id: string }) {
       />
 
       <div className="acao-fixa">
-        <button className="botao principal grande" disabled={!valido} onClick={confirmar}>
+        <button className="botao principal grande" data-tour="confirmar" disabled={!valido} onClick={confirmar}>
           ✓ Confirmar saída
         </button>
       </div>

@@ -50,7 +50,7 @@ export default function ItemDetalhe({ id }: { id: string }) {
       </p>
 
       {!esgotado && (
-        <button className="botao principal grande" onClick={() => ir(`/saida/${item.id}`)}>
+        <button className="botao principal grande" data-tour="dar-saida" onClick={() => ir(`/saida/${item.id}`)}>
           📤 Dar saída
         </button>
       )}

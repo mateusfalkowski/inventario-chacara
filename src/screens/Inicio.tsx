@@ -10,7 +10,7 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
 
   return (
     <div className="inicio">
-      <button className="bloco principal" onClick={() => ir('/novo')}>
+      <button className="bloco principal" data-tour="cadastrar" onClick={() => ir('/novo')}>
         <span className="bloco-icone">📷</span>
         <span>
           <strong>Cadastrar material</strong>
@@ -24,7 +24,7 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
           <strong>Dar saída</strong>
           <small>Vendido, doado…</small>
         </button>
-        <button className="atalho" onClick={() => ir('/estoque')}>
+        <button className="atalho" data-tour="estoque" onClick={() => ir('/estoque')}>
           <span className="atalho-icone">📋</span>
           <strong>Estoque</strong>
           <small>{emEstoque === 1 ? '1 item' : `${emEstoque} itens`}</small>

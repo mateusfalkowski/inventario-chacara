@@ -207,33 +207,35 @@ export default function NovoItem() {
           ) : (
             <p className="fraco">Uma foto boa ajuda a vender. Mostre o material inteiro, com boa luz.</p>
           )}
-          <label className={`botao principal grande${processando ? ' ocupado' : ''}`}>
-            {processando ? 'Preparando foto…' : foto ? '📷 Tirar outra foto' : '📷 Abrir câmera'}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              hidden
-              disabled={processando}
-              onChange={(e) => escolherFoto(e.target.files?.[0])}
-            />
-          </label>
-          {foto ? (
-            <button className="botao" onClick={() => setPasso(depoisDaFoto)}>
-              Continuar com esta foto
-            </button>
-          ) : (
-            <button className="botao leve" onClick={() => setPasso(depoisDaFoto)}>
-              Cadastrar sem foto
-            </button>
-          )}
+          <div data-tour="foto">
+            <label className={`botao principal grande${processando ? ' ocupado' : ''}`}>
+              {processando ? 'Preparando foto…' : foto ? '📷 Tirar outra foto' : '📷 Abrir câmera'}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                disabled={processando}
+                onChange={(e) => escolherFoto(e.target.files?.[0])}
+              />
+            </label>
+            {foto ? (
+              <button className="botao" onClick={() => setPasso(depoisDaFoto)}>
+                Continuar com esta foto
+              </button>
+            ) : (
+              <button className="botao leve" onClick={() => setPasso(depoisDaFoto)}>
+                Cadastrar sem foto
+              </button>
+            )}
+          </div>
         </section>
       )}
 
       {passo === 'categoria' && (
         <section>
           <h1>2. O que é?</h1>
-          <div className="grade-opcoes">
+          <div className="grade-opcoes" data-tour="categorias">
             {CATEGORIAS.map((c) => (
               <button
                 key={c.id}
@@ -257,7 +259,7 @@ export default function NovoItem() {
       {passo === 'estado' && (
         <section>
           <h1>3. Em que estado está?</h1>
-          <div className="lista-estados">
+          <div className="lista-estados" data-tour="estados">
             {ESTADOS.map((e) => (
               <button
                 key={e.id}
@@ -282,7 +284,7 @@ export default function NovoItem() {
       {passo === 'destino' && (
         <section>
           <h1>4. Para onde deve ir?</h1>
-          <div className="grade-opcoes">
+          <div className="grade-opcoes" data-tour="destinos">
             {DESTINOS.map((d) => (
               <button
                 key={d.id}
@@ -353,7 +355,7 @@ export default function NovoItem() {
 
           {/* Preso no rodapé: em celular pequeno o botão fica sempre à vista, sem rolar. */}
           <div className="acao-fixa">
-            <button className="botao principal grande" onClick={conferirParecidos} disabled={quantidade <= 0}>
+            <button className="botao principal grande" data-tour="salvar" onClick={conferirParecidos} disabled={quantidade <= 0}>
               ✓ Salvar material
             </button>
           </div>

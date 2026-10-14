@@ -1,8 +1,10 @@
-// Modo treino: as telas de verdade, com um store só na memória e um guia em
-// cima dizendo o que fazer. Aprende fazendo, sem risco de sujar o estoque.
-// O progresso é deduzido do que a pessoa já fez (cadastrou? abriu a ficha? deu saída?).
+// Modo treino: as telas de verdade, com um store só na memória e um holofote
+// que escurece a tela e mostra exatamente onde tocar. Aprende fazendo, sem
+// risco de sujar o estoque. O progresso é deduzido do que a pessoa já fez
+// (cadastrou? abriu a ficha? deu saída?).
 import { useEffect, useState } from 'react'
 import { criarStoreMemoria } from '../data/memoria'
+import Holofote, { type Alvo } from '../Holofote'
 import Moldura from '../Moldura'
 import type { Item } from '../types'
 
@@ -31,57 +33,69 @@ export default function Treino({ partes, onSair, ...resto }: Props) {
   const deuSaida = itens.some((i) => i.movimentos.some((m) => m.tipo === 'saida'))
   const passo = !cadastrou ? 1 : !abriuFicha && !deuSaida ? 2 : !deuSaida ? 3 : 4
 
-  const guia = (
-    <section className={`guia${passo === 4 ? ' guia-fim' : ''}`} aria-live="polite">
-      {passo === 4 ? (
-        <>
-          <strong>🎉 Pronto! Você já sabe o básico.</strong>
-          <p>
-            Se errar algo de verdade, abra a ficha do material: dá para corrigir os dados, somar quando chega mais e
-            desfazer uma saída lançada por engano.
-          </p>
-          <button className="botao principal" onClick={onSair}>
-            Começar a usar de verdade
-          </button>
-        </>
+  return (
+    <>
+      <Moldura {...resto} store={store} itens={itens} partes={partes} />
+      {passo < 4 ? (
+        <Holofote alvos={alvosDoPasso(passo, tela)} rotulo={`Treino ${passo} de 3 · ${TITULOS[passo]}`} onSair={onSair} />
       ) : (
-        <>
-          <div className="guia-topo">
-            <strong>
-              Treino {passo}/3 · {TITULOS[passo]}
-            </strong>
-            <button className="link" onClick={onSair}>
-              Sair
+        <div className="popup-fundo" role="dialog" aria-modal="true" aria-labelledby="fim-treino">
+          <div className="popup">
+            <div className="popup-icone">🎉</div>
+            <h2 id="fim-treino">Pronto! Você já sabe o básico.</h2>
+            <p>
+              Se errar algo de verdade, abra a ficha do material: dá para corrigir os dados, somar quando chega mais e
+              desfazer uma saída lançada por engano.
+            </p>
+            <button className="botao principal grande" autoFocus onClick={onSair}>
+              Começar a usar de verdade
             </button>
           </div>
-          <p>{dica(passo, tela)}</p>
-        </>
+        </div>
       )}
-    </section>
+    </>
   )
-
-  return <Moldura {...resto} store={store} itens={itens} partes={partes} guia={guia} />
 }
 
 const TITULOS: Record<number, string> = {
-  1: 'Cadastre um material de mentira',
-  2: 'Abra a ficha do material',
-  3: 'Dê saída no material',
+  1: 'Cadastrar',
+  2: 'Achar no estoque',
+  3: 'Dar saída',
 }
 
-function dica(passo: number, tela: string | undefined) {
+const VOLTAR: Alvo = { seletor: '.voltar', texto: 'Toque em "Voltar" para ir ao início.' }
+
+/** Onde tocar em cada passo. Só um passo do cadastro aparece por vez, então a ordem tanto faz ali. */
+function alvosDoPasso(passo: number, tela: string | undefined): Alvo[] {
   if (passo === 1) {
-    return tela === 'novo'
-      ? 'Siga os passos. Pode fotografar qualquer coisa perto de você. No fim, toque em "Salvar material".'
-      : 'Toque em "Cadastrar material". Nada do que fizer aqui vai para o estoque de verdade.'
+    if (tela === 'novo') {
+      return [
+        { seletor: '[data-tour=foto]', texto: 'Tire uma foto de qualquer coisa perto de você, ou toque em "Cadastrar sem foto".' },
+        { seletor: '[data-tour=categorias]', texto: 'O que é o material? Toque em uma opção.' },
+        { seletor: '[data-tour=estados]', texto: 'Em que estado ele está? Toque em uma opção.' },
+        { seletor: '[data-tour=destinos]', texto: 'Para onde ele deve ir? Toque em uma opção.' },
+        { seletor: '[data-tour=salvar]', texto: 'Quantidade e local já vêm preenchidos. Toque em "Salvar material".' },
+      ]
+    }
+    if (!tela) return [{ seletor: '[data-tour=cadastrar]', texto: 'Chegou material? Comece sempre por aqui.' }]
+    return [VOLTAR]
   }
   if (passo === 2) {
-    if (tela === 'estoque') return 'Toque no material que você acabou de cadastrar.'
-    return tela
-      ? 'Toque em "‹ Voltar", lá em cima, e depois em "Estoque". É ali que se encontra qualquer material.'
-      : 'Toque em "Estoque". É ali que se encontra qualquer material.'
+    if (tela === 'estoque') return [{ seletor: '.cartao-item', texto: 'Toque no material que você acabou de cadastrar.' }]
+    if (!tela) return [{ seletor: '[data-tour=estoque]', texto: 'Aqui fica tudo o que está guardado. Toque em "Estoque".' }]
+    return [{ ...VOLTAR, texto: 'Material salvo! Agora toque em "Voltar".' }]
   }
-  return tela === 'saida'
-    ? 'Escolha para onde foi, quanto saiu e toque em "Confirmar saída".'
-    : 'Na ficha do material, toque em "Dar saída". Faça de conta que foi vendido.'
+  // passo 3
+  if (tela === 'item') {
+    return [{ seletor: '[data-tour=dar-saida]', texto: 'Faça de conta que ele foi vendido: toque em "Dar saída".' }]
+  }
+  if (tela === 'saida') {
+    return [
+      { seletor: '[data-tour=confirmar]:not(:disabled)', texto: 'O destino já vem marcado. Toque em "Confirmar saída".' },
+      { seletor: '[data-tour=destinos]', texto: 'Para onde foi? Toque em uma opção.' },
+    ]
+  }
+  if (tela === 'estoque') return [{ seletor: '.cartao-item', texto: 'Toque no material para abrir a ficha.' }]
+  if (!tela) return [{ seletor: '[data-tour=estoque]', texto: 'Toque em "Estoque" e abra o material.' }]
+  return [VOLTAR]
 }
