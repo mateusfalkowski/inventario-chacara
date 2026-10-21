@@ -2,10 +2,11 @@
 // foto → categoria → estado → destino → quantidade/local. Os passos 2 a 4
 // avançam sozinhos ao tocar, então um item simples leva ~6 toques.
 // O destino na chegada é pedido da Equipe 3 (classificar e destinar na recepção).
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ir, lembrado, lembrar, useApp } from '../app-context'
 import { CartaoItem, Chips, Contador } from '../components'
 import { CATEGORIAS, DESTINOS, ESTADOS, LOCAIS, UNIDADES, categoria, destino } from '../config'
+import { destaques, prepararIA, sugerirCategorias } from '../ia/classificar'
 import { prepararFoto } from '../lib/imagem'
 import { novoCodigo, qtd, semAcento } from '../lib/util'
 import type { EstadoId, Item } from '../types'
@@ -30,8 +31,16 @@ export default function NovoItem() {
   // true = em vez de criar um item novo, somou a quantidade num que já existia
   const [somado, setSomado] = useState(false)
   const [parecidos, setParecidos] = useState<Item[]>([])
+  // Sugestão da IA pela foto: "analisando", as categorias a destacar, ou nada.
+  const [ia, setIa] = useState<'analisando' | string[] | null>(null)
+  const pedidoIa = useRef(0)
   // "Cadastrar outro igual": categoria já escolhida, então a foto pula direto para o estado.
   const depoisDaFoto: Passo = cat ? 'estado' : 'categoria'
+
+  // Já começa a baixar o modelo da IA (só na primeira vez) enquanto a pessoa tira a foto.
+  useEffect(() => {
+    if (navigator.onLine) prepararIA().catch(() => {})
+  }, [])
 
   // Obras já usadas viram atalhos, para não digitar o mesmo nome toda vez.
   const obras = [...new Set(itens.map((i) => i.origem).filter(Boolean))].slice(0, 6)
@@ -40,13 +49,26 @@ export default function NovoItem() {
     if (!arquivo) return
     setProcessando(true)
     try {
-      setFoto(await prepararFoto(arquivo))
+      const nova = await prepararFoto(arquivo)
+      setFoto(nova)
       setPasso(depoisDaFoto)
+      // "Outro igual" já sabe a categoria: não precisa da IA.
+      if (!cat) analisarFoto(nova.foto)
     } catch {
       alert('Não foi possível ler essa foto. Tente de novo.')
     } finally {
       setProcessando(false)
     }
+  }
+
+  function analisarFoto(dataUrl: string) {
+    const n = ++pedidoIa.current
+    setIa('analisando')
+    sugerirCategorias(dataUrl).then(
+      (palpites) => n === pedidoIa.current && setIa(destaques(palpites)),
+      // Sem internet na primeira vez, ou aparelho sem suporte: segue sem sugestão.
+      () => n === pedidoIa.current && setIa(null),
+    )
   }
 
   // Com várias pessoas cadastrando, o erro mais comum é o mesmo material entrar
@@ -115,6 +137,8 @@ export default function NovoItem() {
     // Mantém local e obra: normalmente se cadastra vários itens da mesma leva.
     // "Igual" mantém também o que é (ex.: 10 portas iguais em estados diferentes).
     setFoto(null)
+    pedidoIa.current++
+    setIa(null)
     setEst('')
     setDest('')
     setQuantidade(1)
@@ -235,11 +259,17 @@ export default function NovoItem() {
       {passo === 'categoria' && (
         <section>
           <h1>2. O que é?</h1>
+          {ia === 'analisando' && <p className="ia-linha analisando">✨ Analisando a foto…</p>}
+          {Array.isArray(ia) && ia.length > 0 && (
+            <p className="ia-linha">
+              ✨ Parece: <strong>{ia.map((id) => categoria(id).nome).join(' ou ')}</strong>
+            </p>
+          )}
           <div className="grade-opcoes" data-tour="categorias">
             {CATEGORIAS.map((c) => (
               <button
                 key={c.id}
-                className={`opcao${cat === c.id ? ' ativo' : ''}`}
+                className={`opcao${cat === c.id ? ' ativo' : ''}${Array.isArray(ia) && ia.includes(c.id) ? ' sugerido' : ''}`}
                 onClick={() => {
                   setCat(c.id)
                   setPasso('estado')

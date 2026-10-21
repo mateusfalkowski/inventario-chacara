@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "ia:gerar": "node scripts/gerar-vetores-ia.mjs",
+    "ia:testar": "node scripts/testar-ia.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.1",
     "firebase": "^12.19.0",
     "qrcode": "^1.5.4",
     "react": "^19.3.0",

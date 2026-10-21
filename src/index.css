@@ -1512,3 +1512,45 @@ input:focus {
     animation: none;
   }
 }
+
+/* ---------- Sugestão da IA ---------- */
+
+.ia-linha {
+  margin: -0.4rem 0 0.7rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: #f1ebfa;
+  color: #4b3a6b;
+  font-size: 0.95rem;
+}
+
+.ia-linha.analisando {
+  animation: ia-piscar 1.2s ease-in-out infinite;
+}
+
+@keyframes ia-piscar {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Opção sugerida: borda roxa e selo ✨ no canto (some quando a pessoa escolhe). */
+.opcao.sugerido:not(.ativo) {
+  border-color: #8a6cc4;
+  box-shadow: 0 0 0 2px #8a6cc4;
+  background: #faf7ff;
+}
+
+.opcao.sugerido:not(.ativo)::after {
+  content: '✨';
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ia-linha.analisando {
+    animation: none;
+  }
+}

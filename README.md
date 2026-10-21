@@ -83,6 +83,34 @@ No celular, abra o endereço e use **"Adicionar à tela inicial"** para instalar
   mesmo tempo, mesmo offline, não sobrescrevem uma à outra.
 - **Códigos de 5 letras** sem caracteres ambíguos (sem 0/O, 1/I, 5/S…), gerados no aparelho.
 
+## Sugestão de categoria pela foto (IA no celular)
+
+Depois da foto, o passo "O que é?" destaca a categoria provável ("✨ Parece: Móveis"); se a
+disputa for apertada, destaca duas. A IA só sugere, quem escolhe é a pessoa.
+
+- **Modelo:** MobileCLIP-S0, só a parte que lê imagens, em meia precisão (fp16, ~23 MB). Roda no
+  próprio aparelho com [transformers.js](https://huggingface.co/docs/transformers.js): sem servidor,
+  sem custo, a foto não sai do celular. Baixa uma vez (ao abrir o cadastro) e fica guardado;
+  depois funciona sem internet e responde em menos de 1 segundo.
+- **Categorias:** cada uma tem descrições em inglês em [`src/ia/descricoes.ts`](src/ia/descricoes.ts).
+  Os vetores delas já vêm calculados em `src/ia/vetores.json`, então o celular não precisa baixar
+  a parte do modelo que lê texto. Mudou as categorias (Equipe 3) ou as descrições? Rode:
+
+  ```bash
+  npm run ia:gerar
+  ```
+
+- **Medir o acerto:** uma pasta com uma subpasta por categoria (mesmos ids de `src/config.ts`),
+  cada uma com fotos:
+
+  ```bash
+  npm run ia:testar -- caminho/da/pasta
+  ```
+
+  Com 26 fotos reais de exemplo (Wikimedia Commons): **81% de acerto de primeira, 96% com a
+  certa entre as 3 primeiras**. A versão comprimida do modelo (q8, ~12 MB) caiu para 19% no mesmo
+  teste, por isso não é usada. `IA_DTYPE=q8 npm run ia:testar -- ...` compara versões.
+
 ## Limitações do protótipo
 
 - Uma senha só para a equipe, digitada uma vez por celular. Não há conta por pessoa: o nome
