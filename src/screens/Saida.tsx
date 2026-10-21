@@ -3,14 +3,11 @@ import { ir, irSubstituindo, useApp } from '../app-context'
 import { Contador, Miniatura, SeloEstado, tituloItem } from '../components'
 import { DESTINOS } from '../config'
 import { qtd } from '../lib/util'
+import type { Item } from '../types'
 
 export default function Saida({ id }: { id: string }) {
-  const { itens, store, operador } = useApp()
+  const { itens } = useApp()
   const item = itens.find((i) => i.id === id)
-  // Já vem marcado o destino decidido na chegada; dá para trocar.
-  const [dest, setDest] = useState(item?.destinoPrevisto ?? '')
-  const [quantidade, setQuantidade] = useState(item?.quantidade ?? 1)
-  const [obs, setObs] = useState('')
 
   if (!item) {
     return (
@@ -32,10 +29,22 @@ export default function Saida({ id }: { id: string }) {
     )
   }
 
+  // O formulário só monta com o item já carregado: assim o destino e a quantidade
+  // começam certos mesmo quando a tela abre (por um link) antes de os dados chegarem.
+  return <Formulario key={item.id} item={item} />
+}
+
+function Formulario({ item }: { item: Item }) {
+  const { store, operador } = useApp()
+  // Já vem marcado o destino decidido na chegada; dá para trocar.
+  const [dest, setDest] = useState(item.destinoPrevisto ?? '')
+  const [quantidade, setQuantidade] = useState(item.quantidade)
+  const [obs, setObs] = useState('')
+
   const valido = dest && quantidade > 0 && quantidade <= item.quantidade
 
   function confirmar() {
-    if (!valido || !item) return
+    if (!valido) return
     store.movimentar(item.id, {
       tipo: 'saida',
       quantidade,

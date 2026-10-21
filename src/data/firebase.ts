@@ -55,15 +55,26 @@ export async function criarStoreFirebase(): Promise<Store> {
   return {
     modo: 'firebase',
     observar(cb) {
-      let cancelar = () => {}
-      let ativo = true
-      void logado.then(() => {
-        if (!ativo) return
-        cancelar = onSnapshot(collection(db, 'itens'), (snap) => cb(snap.docs.map((d) => d.data() as Item)))
+      // A lista acompanha o login: liga ao entrar, desliga (e esvazia) ao sair e
+      // religa no próximo login. Sem isso, depois de "Sair" (ou de a senha da
+      // equipe ser trocada, o que desloga todo mundo) a lista ficava congelada.
+      let cancelarLista = () => {}
+      const pararLogin = onAuthStateChanged(auth, (user) => {
+        cancelarLista()
+        cancelarLista = () => {}
+        if (!user) {
+          cb([])
+          return
+        }
+        cancelarLista = onSnapshot(
+          collection(db, 'itens'),
+          (snap) => cb(snap.docs.map((d) => d.data() as Item)),
+          (e) => console.error('Erro ao ler o estoque', e),
+        )
       })
       return () => {
-        ativo = false
-        cancelar()
+        pararLogin()
+        cancelarLista()
       }
     },
     adicionar(item, foto) {
