@@ -1,4 +1,4 @@
-import { Ctx, ir } from './app-context'
+import { Ctx, voltar } from './app-context'
 import type { Store } from './data/store'
 import Editar from './screens/Editar'
 import Estoque from './screens/Estoque'
@@ -30,7 +30,7 @@ export default function Moldura({ store, itens, operador, online, partes, busca,
         {!tela ? (
           <span className="marca">Inventário Chácara</span>
         ) : (
-          <button className="voltar" onClick={() => (history.length > 1 ? history.back() : ir('/'))} aria-label="Voltar">
+          <button className="voltar" onClick={voltar} aria-label="Voltar">
             ‹ Voltar
           </button>
         )}

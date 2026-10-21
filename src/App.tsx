@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { definirPrefixo, ir, lembrado, lembrar, useRota } from './app-context'
+import { definirPrefixo, lembrado, lembrar, useRota } from './app-context'
 import { criarStore, type Store } from './data/store'
 import Moldura from './Moldura'
 import Treino from './screens/Treino'
@@ -39,24 +39,29 @@ export default function App() {
   if (!logado) return <PedeSenha store={store} />
   if (!operador) return <PerguntaNome onPronto={(n) => (lembrar('operador', n), setOperador(n))} />
   const emTreino = rota.partes[0] === 'treino'
-  // Terminar (ou pular) o manual/treino da primeira vez libera o app de verdade.
-  const concluirManual = () => {
+  // Terminar (ou pular) o treino da primeira vez libera o app de verdade.
+  const marcarManualVisto = () => {
     lembrar('manualVisto', '1')
     setManualVisto(true)
+  }
+  // Saindo do treino: vai para o início do app de verdade.
+  const concluirTreino = () => {
+    marcarManualVisto()
     location.hash = '/'
   }
 
   definirPrefixo(emTreino ? '/treino' : '')
   const comum = { operador, online, trocarNome: () => setOperador('') }
   if (emTreino) {
-    return <Treino {...comum} partes={rota.partes.slice(1)} busca={rota.busca} onSair={concluirManual} />
+    return <Treino {...comum} partes={rota.partes.slice(1)} busca={rota.busca} onSair={concluirTreino} />
   }
   if (!itens) return <Mensagem>Carregando…</Mensagem>
   return (
     <>
       <Moldura {...comum} store={store} itens={itens} partes={rota.partes} busca={rota.busca} />
-      {/* Primeira vez neste aparelho: convite para o treino por cima da tela inicial. */}
-      {!manualVisto && <ConviteTreino onPular={concluirManual} />}
+      {/* Primeira vez neste aparelho: convite para o treino por cima da tela atual.
+          "Agora não" fecha sem sair da tela (quem chegou pelo QR continua no item). */}
+      {!manualVisto && <ConviteTreino onPular={marcarManualVisto} />}
     </>
   )
 }
@@ -139,10 +144,8 @@ function PerguntaNome({ onPronto }: { onPronto: (nome: string) => void }) {
       className="pergunta-nome"
       onSubmit={(e) => {
         e.preventDefault()
-        if (nome.trim()) {
-          onPronto(nome.trim())
-          ir('/')
-        }
+        // Sem mudar de tela: quem chegou pelo QR continua no item depois de dizer o nome.
+        if (nome.trim()) onPronto(nome.trim())
       }}
     >
       <img src="icon.svg" alt="" width={72} height={72} />

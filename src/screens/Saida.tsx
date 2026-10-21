@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ir, irSubstituindo, useApp } from '../app-context'
+import { concluirEIr, ir, useApp } from '../app-context'
 import { Contador, Miniatura, SeloEstado, tituloItem } from '../components'
 import { DESTINOS } from '../config'
 import { qtd } from '../lib/util'
@@ -54,8 +54,8 @@ function Formulario({ item }: { item: Item }) {
       em: Date.now(),
       por: operador,
     })
-    // replace: o "Voltar" do item não reabre o formulário de saída.
-    irSubstituindo(`/item/${item.id}`)
+    // Volta para a ficha sem deixar o formulário de saída no histórico.
+    concluirEIr(`/item/${item.id}`)
   }
 
   return (
