@@ -19,6 +19,7 @@ import {
   persistentMultipleTabManager,
   setDoc,
   updateDoc,
+  waitForPendingWrites,
 } from 'firebase/firestore'
 import type { Item } from '../types'
 import { variacao, type Store } from './store'
@@ -119,6 +120,9 @@ export async function criarStoreFirebase(): Promise<Store> {
       await signInWithEmailAndPassword(auth, env.VITE_EQUIPE_EMAIL ?? '', senha)
     },
     async sair() {
+      // Antes de sair, espera subir o que foi gravado sem internet (até 8 s): depois
+      // de sair, o banco recusaria essas gravações e elas se perderiam.
+      await Promise.race([waitForPendingWrites(db), new Promise((ok) => setTimeout(ok, 8000))])
       await signOut(auth)
     },
   }

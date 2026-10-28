@@ -15,6 +15,7 @@ foto primeiro, e funciona **sem internet** (sincroniza quando o sinal volta).
 | Tela | Para quê |
 |---|---|
 | **Cadastrar material** | Foto → categoria → estado → destino previsto → quantidade/local. ~6 toques por item. Gera um código curto (ex.: `JACMD`). "Cadastrar outro igual" repete o item anterior e só pede foto e estado. |
+| **Conjunto e peças** | Um item pode ter peças (subitens), ex.: "Porta completa" com batente e fechadura. Cada peça tem código, etiqueta e estado próprios; a saída do conjunto pode levar as peças junto. Um nível só. |
 | **Ficha do item** | "Chegou mais" soma quantidade; "Corrigir dados" conserta qualquer campo (quantidade corrigida fica no histórico); saída lançada por engano pode ser desfeita. |
 | **Etiqueta** | Etiqueta com QR para imprimir. A câmera de qualquer celular lê o QR e abre a ficha do item. |
 | **Dar saída** | Venda, doação, artesãos, uso interno, reciclagem ou descarte (já vem marcado o destino previsto). Aceita saída parcial. |
@@ -117,5 +118,8 @@ disputa for apertada, destaca duas. A IA só sugere, quem escolhe é a pessoa.
   digitado depois da senha é o que aparece no histórico. Para trocar a senha, mude a da conta
   da equipe no console e avise todo mundo: trocar a senha desconecta os celulares, que vão
   pedir a senha nova.
+- Para obrigar todos os celulares a digitar a senha e ver o tutorial de novo (sem trocar a
+  senha), aumente `VERSAO_ACESSO` em [`src/App.tsx`](src/App.tsx) e publique. Só vale quando o
+  celular abre o app com internet, para não perder o que ainda não subiu.
 - Sem campo de preço — aguardando a calculadora da **Equipe 4**.
 - Sem exportação específica para a vitrine da **Equipe 6** — combinar o formato no Encontro 4 (28/10).

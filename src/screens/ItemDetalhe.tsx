@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ir, useApp } from '../app-context'
-import { Contador, SeloEstado, tituloItem } from '../components'
+import { CartaoItem, Contador, SeloEstado, tituloItem } from '../components'
 import { categoria, destino } from '../config'
 import { dataCurta, diasDesde, qtd } from '../lib/util'
 import type { Item, Movimento } from '../types'
@@ -31,6 +31,9 @@ export default function ItemDetalhe({ id }: { id: string }) {
   }
 
   const cat = categoria(item.categoria)
+  // Conjunto (item com subitens): as peças dele, ou o conjunto de que esta peça faz parte.
+  const pecas = itens.filter((i) => i.pai === item.id)
+  const conjunto = item.pai ? itens.find((i) => i.id === item.pai) : undefined
   const esgotado = item.quantidade <= 0
   const parado = diasDesde(item.atualizadoEm)
 
@@ -48,6 +51,12 @@ export default function ItemDetalhe({ id }: { id: string }) {
         <SeloEstado id={item.estado} /> <span>{cat.icone} {cat.nome}</span>
         <strong>{esgotado ? 'Saiu tudo' : qtd(item.quantidade, item.unidade)}</strong>
       </p>
+      {item.pai && (
+        <button className="link-conjunto" onClick={() => ir(`/item/${item.pai}`)}>
+          🧩 Faz parte de: <strong>{conjunto ? tituloItem(conjunto) : 'conjunto'}</strong>{' '}
+          <span className="codigo">{item.pai}</span> ›
+        </button>
+      )}
 
       {!esgotado && (
         <button className="botao principal grande" data-tour="dar-saida" onClick={() => ir(`/saida/${item.id}`)}>
@@ -81,6 +90,33 @@ export default function ItemDetalhe({ id }: { id: string }) {
           </button>
         </div>
       )}
+
+      {/* Peças (subitens). Só um nível: peça não tem peças. */}
+      {!item.pai &&
+        (pecas.length > 0 ? (
+          <section className="pecas">
+            <h2>
+              🧩 Peças deste conjunto <span className="fraco">({pecas.length})</span>
+            </h2>
+            <div className="lista">
+              {pecas.map((p) => (
+                <CartaoItem key={p.id} item={p} onClick={() => ir(`/item/${p.id}`)} />
+              ))}
+            </div>
+            <div className="botoes-lado">
+              <button className="botao" onClick={() => ir(`/novo?pai=${item.id}`)}>
+                ➕ Adicionar peça
+              </button>
+              <button className="botao" onClick={() => ir(`/etiqueta/${[item.id, ...pecas.map((p) => p.id)].join(',')}`)}>
+                🏷️ Etiquetas do conjunto
+              </button>
+            </div>
+          </section>
+        ) : (
+          <button className="botao leve" onClick={() => ir(`/novo?pai=${item.id}`)}>
+            🧩 É um conjunto? Adicionar peça
+          </button>
+        ))}
 
       {/* Detalhes depois dos botões: no celular a ação principal aparece sem rolar. */}
       <dl className="ficha">

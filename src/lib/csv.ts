@@ -9,7 +9,7 @@ const celula = (v: string | number) => {
 }
 
 export function itensParaCsv(itens: Item[]) {
-  const cab = ['Código', 'Categoria', 'Descrição', 'Quantidade', 'Unidade', 'Estado', 'Destino previsto', 'Local', 'Obra de origem',
+  const cab = ['Código', 'Categoria', 'Descrição', 'Quantidade', 'Unidade', 'Estado', 'Destino previsto', 'Local', 'Obra de origem', 'Conjunto',
     'Cadastrado em', 'Cadastrado por', 'Saídas', 'Destinos']
   const linhas = itens.map((i) => {
     const saidas = i.movimentos.filter((m) => m.tipo === 'saida')
@@ -23,6 +23,7 @@ export function itensParaCsv(itens: Item[]) {
       destino(i.destinoPrevisto ?? '')?.nome ?? '',
       i.local,
       i.origem,
+      i.pai ?? '',
       dataCurta(i.criadoEm),
       i.criadoPor,
       saidas.reduce((s, m) => s + m.quantidade, 0).toLocaleString('pt-BR'),

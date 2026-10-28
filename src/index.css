@@ -1554,3 +1554,57 @@ input:focus {
     animation: none;
   }
 }
+
+/* ---------- Conjunto e peças (item e subitem) ---------- */
+
+.cartao-linha.conjunto {
+  color: #7a4f12;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.link-conjunto {
+  display: block;
+  width: 100%;
+  margin: 0.2rem 0 0.4rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ecd9b6;
+  border-radius: 12px;
+  background: #fbf3e4;
+  color: #5c3c0c;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.aviso-conjunto {
+  margin: 0 0 0.8rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: #fbf3e4;
+  color: #5c3c0c;
+  font-size: 0.95rem;
+}
+
+.pecas {
+  margin-top: 0.4rem;
+}
+
+.caixa-pecas {
+  align-items: flex-start;
+  margin-top: 1rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  background: #fbf3e4;
+  color: #5c3c0c;
+}
+
+.caixa-pecas input {
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+.caixa-pecas small {
+  display: block;
+  margin-top: 0.15rem;
+}

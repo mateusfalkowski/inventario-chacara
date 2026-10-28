@@ -5,6 +5,11 @@ import Moldura from './Moldura'
 import Treino from './screens/Treino'
 import type { Item } from './types'
 
+// Mude este número para obrigar todos os celulares a digitar a senha da equipe e
+// ver o convite do tutorial de novo na próxima vez que abrirem o app (com internet).
+// O nome de cada pessoa continua salvo.
+const VERSAO_ACESSO = '2'
+
 export default function App() {
   const [store, setStore] = useState<Store | null>(null)
   const [itens, setItens] = useState<Item[] | null>(null)
@@ -17,7 +22,16 @@ export default function App() {
   const rota = useRota()
 
   useEffect(() => {
-    criarStore().then(setStore, (e) => setErro(String(e)))
+    criarStore().then(async (s) => {
+      // Só com internet: sair sem sinal poderia perder o que ainda não subiu.
+      if (lembrado('versaoAcesso') !== VERSAO_ACESSO && navigator.onLine) {
+        await s.sair()
+        lembrar('manualVisto', '')
+        setManualVisto(false)
+        lembrar('versaoAcesso', VERSAO_ACESSO)
+      }
+      setStore(s)
+    }, (e) => setErro(String(e)))
   }, [])
 
   useEffect(() => store?.observarLogin(setLogado), [store])

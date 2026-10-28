@@ -3,8 +3,8 @@
 // avançam sozinhos ao tocar, então um item simples leva ~6 toques.
 // O destino na chegada é pedido da Equipe 3 (classificar e destinar na recepção).
 import { useEffect, useRef, useState } from 'react'
-import { ir, lembrado, lembrar, useApp } from '../app-context'
-import { CartaoItem, Chips, Contador } from '../components'
+import { concluirEIr, ir, lembrado, lembrar, useApp } from '../app-context'
+import { CartaoItem, Chips, Contador, tituloItem } from '../components'
 import { CATEGORIAS, DESTINOS, ESTADOS, LOCAIS, UNIDADES, categoria, destino } from '../config'
 import { destaques, prepararIA, sugerirCategorias } from '../ia/classificar'
 import { prepararFoto } from '../lib/imagem'
@@ -14,8 +14,10 @@ import type { EstadoId, Item } from '../types'
 type Passo = 'foto' | 'categoria' | 'estado' | 'destino' | 'detalhes' | 'parecido' | 'pronto'
 const PASSOS: Passo[] = ['foto', 'categoria', 'estado', 'destino', 'detalhes']
 
-export default function NovoItem() {
+export default function NovoItem({ pai }: { pai?: string }) {
   const { store, itens, operador } = useApp()
+  // Cadastrando uma peça de um conjunto (subitem): o item principal.
+  const conjunto = pai ? itens.find((i) => i.id === pai) : undefined
   const [passo, setPasso] = useState<Passo>('foto')
   const [foto, setFoto] = useState<{ foto: string; thumb: string } | null>(null)
   const [processando, setProcessando] = useState(false)
@@ -24,8 +26,9 @@ export default function NovoItem() {
   const [dest, setDest] = useState('')
   const [quantidade, setQuantidade] = useState(1)
   const [unidade, setUnidade] = useState('unidade')
-  const [local, setLocal] = useState(() => lembrado('ultimoLocal') || LOCAIS[0])
-  const [origem, setOrigem] = useState(() => lembrado('ultimaOrigem'))
+  // Peça começa no mesmo local e obra do conjunto.
+  const [local, setLocal] = useState(() => conjunto?.local || lembrado('ultimoLocal') || LOCAIS[0])
+  const [origem, setOrigem] = useState(() => conjunto?.origem ?? lembrado('ultimaOrigem'))
   const [descricao, setDescricao] = useState('')
   const [salvo, setSalvo] = useState<Item | null>(null)
   // true = em vez de criar um item novo, somou a quantidade num que já existia
@@ -83,6 +86,8 @@ export default function NovoItem() {
           i.estado === est &&
           i.local === local &&
           i.unidade === unidade &&
+          // Peça só é comparada com peças do mesmo conjunto; item avulso, com avulsos.
+          (i.pai ?? '') === (pai ?? '') &&
           descricaoParecida(i.descricao, descricao),
       )
       .sort((a, b) => b.atualizadoEm - a.atualizadoEm)
@@ -118,6 +123,8 @@ export default function NovoItem() {
       local,
       origem: origem.trim(),
       destinoPrevisto: dest,
+      // Firestore recusa campos undefined: só grava "pai" quando é peça.
+      ...(pai ? { pai } : {}),
       thumb: foto?.thumb ?? '',
       temFoto: Boolean(foto),
       criadoEm: agora,
@@ -166,7 +173,7 @@ export default function NovoItem() {
           {salvo.destinoPrevisto && ` · ${destino(salvo.destinoPrevisto)?.nome}`}
         </p>
         <button className="botao principal" onClick={() => outro(false)}>
-          📷 Cadastrar outro
+          {pai ? '➕ Adicionar outra peça' : '📷 Cadastrar outro'}
         </button>
         <button className="botao" onClick={() => outro(true)}>
           📷 Cadastrar outro igual{' '}
@@ -175,9 +182,15 @@ export default function NovoItem() {
         <button className="botao" onClick={() => ir(`/etiqueta/${salvo.id}`)}>
           🏷️ Imprimir etiqueta
         </button>
-        <button className="botao leve" onClick={() => ir('/')}>
-          Voltar ao início
-        </button>
+        {pai ? (
+          <button className="botao leve" onClick={() => concluirEIr(`/item/${pai}`)}>
+            🧩 Ver o conjunto
+          </button>
+        ) : (
+          <button className="botao leve" onClick={() => ir('/')}>
+            Voltar ao início
+          </button>
+        )}
       </div>
     )
   }
@@ -210,6 +223,11 @@ export default function NovoItem() {
 
   return (
     <div className="cadastro">
+      {pai && (
+        <p className="aviso-conjunto">
+          🧩 Peça de: <strong>{conjunto ? tituloItem(conjunto) : pai}</strong> <span className="codigo">{pai}</span>
+        </p>
+      )}
       <ol className="progresso" aria-label={`Passo ${indice + 1} de ${PASSOS.length}`}>
         {PASSOS.map((p, i) => (
           <li key={p} className={i < indice ? 'feito' : i === indice ? 'atual' : ''} />

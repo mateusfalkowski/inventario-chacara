@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useApp } from './app-context'
 import { categoria, estado } from './config'
 import { qtd } from './lib/util'
 import type { Item } from './types'
@@ -25,7 +26,9 @@ export function Miniatura({ item, tamanho = 64 }: { item: Item; tamanho?: number
 export const tituloItem = (i: Item) => i.descricao || categoria(i.categoria).nome
 
 export function CartaoItem({ item, onClick }: { item: Item; onClick: () => void }) {
+  const { itens } = useApp()
   const esgotado = item.quantidade <= 0
+  const pecas = itens.filter((i) => i.pai === item.id).length
   return (
     <button className={`cartao-item${esgotado ? ' esgotado' : ''}`} onClick={onClick}>
       <Miniatura item={item} />
@@ -38,6 +41,16 @@ export function CartaoItem({ item, onClick }: { item: Item; onClick: () => void 
         <span className="cartao-linha fraco">
           <span className="codigo">{item.id}</span> · {item.local || 'sem local'}
         </span>
+        {pecas > 0 && (
+          <span className="cartao-linha conjunto">
+            🧩 Conjunto · {pecas === 1 ? '1 peça' : `${pecas} peças`}
+          </span>
+        )}
+        {item.pai && (
+          <span className="cartao-linha conjunto">
+            🧩 Peça de <span className="codigo">{item.pai}</span>
+          </span>
+        )}
       </span>
     </button>
   )

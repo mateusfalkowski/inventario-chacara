@@ -26,6 +26,9 @@ export interface Item {
   /** Para onde o material deve ir (id de DESTINOS), decidido na chegada. '' = ainda não sabe.
    *  Itens cadastrados antes deste campo não têm o valor. */
   destinoPrevisto?: string
+  /** Peça de um conjunto (subitem): id do item principal. Só um nível: peça não tem peças.
+   *  Ex.: "Porta completa" (principal) com folha, batente e fechadura (peças). */
+  pai?: string
   /** Miniatura JPEG em data URL (~15 KB) — a foto grande fica separada */
   thumb: string
   temFoto: boolean

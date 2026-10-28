@@ -44,7 +44,8 @@ export default function Moldura({ store, itens, operador, online, partes, busca,
       </header>
       <main className="conteudo">
         {tela === 'novo' ? (
-          <NovoItem />
+          // key: trocar de "peça do conjunto X" para cadastro avulso recomeça o formulário.
+          <NovoItem key={busca.get('pai') ?? ''} pai={busca.get('pai') ?? undefined} />
         ) : tela === 'estoque' ? (
           <Estoque modoSaida={busca.has('saida')} />
         ) : tela === 'item' && id ? (

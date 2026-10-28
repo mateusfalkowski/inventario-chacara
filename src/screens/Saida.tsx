@@ -35,7 +35,10 @@ export default function Saida({ id }: { id: string }) {
 }
 
 function Formulario({ item }: { item: Item }) {
-  const { store, operador } = useApp()
+  const { store, operador, itens } = useApp()
+  // Conjunto: peças ainda no estoque. Por padrão saem junto com o item principal.
+  const pecas = itens.filter((i) => i.pai === item.id && i.quantidade > 0)
+  const [comPecas, setComPecas] = useState(true)
   // Já vem marcado o destino decidido na chegada; dá para trocar.
   const [dest, setDest] = useState(item.destinoPrevisto ?? '')
   const [quantidade, setQuantidade] = useState(item.quantidade)
@@ -45,15 +48,29 @@ function Formulario({ item }: { item: Item }) {
 
   function confirmar() {
     if (!valido) return
+    const em = Date.now()
     store.movimentar(item.id, {
       tipo: 'saida',
       quantidade,
       destino: dest,
       // Firestore recusa campos `undefined`: só inclui obs se houver.
       ...(obs.trim() ? { obs: obs.trim() } : {}),
-      em: Date.now(),
+      em,
       por: operador,
     })
+    // Cada peça sai inteira, com o mesmo destino e uma observação ligando ao conjunto.
+    if (comPecas) {
+      for (const p of pecas) {
+        store.movimentar(p.id, {
+          tipo: 'saida',
+          quantidade: p.quantidade,
+          destino: dest,
+          obs: `Saiu junto com o conjunto ${item.id}${obs.trim() ? ` · ${obs.trim()}` : ''}`,
+          em,
+          por: operador,
+        })
+      }
+    }
     // Volta para a ficha sem deixar o formulário de saída no histórico.
     concluirEIr(`/item/${item.id}`)
   }
@@ -85,6 +102,16 @@ function Formulario({ item }: { item: Item }) {
       <Contador valor={quantidade} onChange={setQuantidade} max={item.quantidade} />
       {quantidade < item.quantidade && (
         <p className="fraco">Ficam {qtd(item.quantidade - quantidade, item.unidade)} no estoque.</p>
+      )}
+
+      {pecas.length > 0 && (
+        <label className="alternar caixa-pecas">
+          <input type="checkbox" checked={comPecas} onChange={(e) => setComPecas(e.target.checked)} />
+          <span>
+            🧩 Dar saída também nas <strong>{pecas.length === 1 ? '1 peça' : `${pecas.length} peças`}</strong> deste conjunto
+            <small className="fraco">{pecas.map((p) => tituloItem(p)).join(', ')}</small>
+          </span>
+        </label>
       )}
 
       <label className="campo-titulo" htmlFor="obs">

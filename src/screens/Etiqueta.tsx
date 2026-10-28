@@ -44,6 +44,7 @@ export default function Etiqueta({ ids }: { ids: string[] }) {
                 <span>
                   {categoria(item.categoria).nome} · {item.local}
                 </span>
+                {item.pai && <span>Peça do conjunto {item.pai}</span>}
                 <span className="etiqueta-estado">{e.nome}</span>
               </div>
             </div>
