@@ -17,11 +17,8 @@ export interface Store {
   /** Apaga uma saída lançada por engano e devolve a quantidade ao estoque. */
   desfazerSaida(id: string, mov: Movimento): void
   foto(id: string): Promise<string | null>
-  /** Avisa se este aparelho já entrou com a senha da equipe. */
+  /** Avisa se o aparelho já está conectado ao banco (o login é automático, sem senha). */
   observarLogin(cb: (logado: boolean) => void): () => void
-  /** Rejeita se a senha estiver errada. */
-  entrar(senha: string): Promise<void>
-  sair(): Promise<void>
 }
 
 const temFirebase = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID)

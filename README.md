@@ -42,9 +42,8 @@ Sem configurar nada, o app roda em **modo demonstração**: tudo fica salvo só 
 Plano gratuito (Spark), **sem cartão de crédito**.
 
 1. Acesse <https://console.firebase.google.com> → **Adicionar projeto** (pode desativar o Google Analytics).
-2. **Build → Authentication → Começar → E-mail/senha → Ativar.** Em **Usuários → Adicionar usuário**, crie
-   uma conta só para a equipe (ex.: `equipe@inventario-chacara.app` e uma senha fácil de passar adiante).
-   Em **Configurações → Ações do usuário**, desmarque **Ativar criação (inscrição)**.
+2. **Build → Authentication → Começar → Método de login → Anônimo → Ativar.** Não há senha: o app
+   entra sozinho ao abrir.
 3. **Build → Firestore Database → Criar banco de dados** → local `southamerica-east1` (São Paulo) → modo produção.
 4. Em **Firestore → Regras**, cole o conteúdo de [`firestore.rules`](firestore.rules) e publique.
 5. **Configurações do projeto (⚙️) → Seus apps → Web (`</>`)** → registre o app → copie os valores do `firebaseConfig`.
@@ -55,7 +54,7 @@ Plano gratuito (Spark), **sem cartão de crédito**.
 
 No repositório: **Settings → Secrets and variables → Actions → Variables** → crie
 `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` e
-`VITE_FIREBASE_APP_ID` e `VITE_EQUIPE_EMAIL` com os mesmos valores do `.env.local` e rode o workflow de novo
+`VITE_FIREBASE_APP_ID` com os mesmos valores do `.env.local` e rode o workflow de novo
 (essas chaves do Firebase web são públicas por natureza; quem protege os dados são as regras).
 No Firebase, em **Authentication → Configurações → Domínios autorizados**, adicione
 `mateusfalkowski.github.io`.
@@ -114,12 +113,10 @@ disputa for apertada, destaca duas. A IA só sugere, quem escolhe é a pessoa.
 
 ## Limitações do protótipo
 
-- Uma senha só para a equipe, digitada uma vez por celular. Não há conta por pessoa: o nome
-  digitado depois da senha é o que aparece no histórico. Para trocar a senha, mude a da conta
-  da equipe no console e avise todo mundo: trocar a senha desconecta os celulares, que vão
-  pedir a senha nova.
-- Para obrigar todos os celulares a digitar a senha e ver o tutorial de novo (sem trocar a
-  senha), aumente `VERSAO_ACESSO` em [`src/App.tsx`](src/App.tsx) e publique. Só vale quando o
-  celular abre o app com internet, para não perder o que ainda não subiu.
+- Sem senha: o app entra sozinho (login anônimo do Firebase). Quem tem o link consegue ver e
+  alterar o estoque, mas ninguém consegue apagar itens. Não há conta por pessoa: o nome digitado
+  na primeira vez é o que aparece no histórico.
+- Para todos os celulares verem o convite do tutorial de novo, aumente `VERSAO_ACESSO` em
+  [`src/App.tsx`](src/App.tsx) e publique.
 - Sem campo de preço — aguardando a calculadora da **Equipe 4**.
 - Sem exportação específica para a vitrine da **Equipe 6** — combinar o formato no Encontro 4 (28/10).

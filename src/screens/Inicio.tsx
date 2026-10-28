@@ -50,14 +50,6 @@ export default function Inicio({ trocarNome }: { trocarNome: () => void }) {
         <button className="link" onClick={trocarNome}>
           Trocar nome
         </button>
-        <button
-          className="link"
-          onClick={() => {
-            if (confirm('Sair deste celular? Vai precisar da senha da equipe para entrar de novo.')) void store.sair()
-          }}
-        >
-          Sair
-        </button>
       </nav>
 
       {store.modo === 'local' && (

@@ -25,24 +25,6 @@ function pedido<T>(req: IDBRequest<T>): Promise<T> {
 export async function criarStoreLocal(): Promise<Store> {
   const db = await abrir()
   const ouvintes = new Set<(itens: Item[]) => void>()
-  // Sem servidor não há como conferir a senha: qualquer uma entra. Serve só
-  // para mostrar o fluxo; os dados ficam neste aparelho de qualquer jeito.
-  const ouvintesLogin = new Set<(logado: boolean) => void>()
-  let logado = false
-  try {
-    logado = localStorage.getItem('demo-logado') === '1'
-  } catch {
-    /* aba anônima: pede a senha de novo */
-  }
-  const mudarLogin = (valor: boolean) => {
-    logado = valor
-    try {
-      localStorage.setItem('demo-logado', valor ? '1' : '0')
-    } catch {
-      /* vale só até fechar a aba */
-    }
-    ouvintesLogin.forEach((cb) => cb(valor))
-  }
   const loja = (nome: 'itens' | 'fotos', modo: IDBTransactionMode = 'readonly') =>
     db.transaction(nome, modo).objectStore(nome)
 
@@ -103,16 +85,10 @@ export async function criarStoreLocal(): Promise<Store> {
     async foto(id) {
       return ((await pedido(loja('fotos').get(id))) as string | undefined) ?? null
     },
+    // Sem servidor não há login: sempre "conectado".
     observarLogin(cb) {
-      ouvintesLogin.add(cb)
-      cb(logado)
-      return () => void ouvintesLogin.delete(cb)
-    },
-    async entrar() {
-      mudarLogin(true)
-    },
-    async sair() {
-      mudarLogin(false)
+      cb(true)
+      return () => {}
     },
   }
 }

@@ -51,7 +51,5 @@ export function criarStoreMemoria(): Store {
       cb(true)
       return () => {}
     },
-    async entrar() {},
-    async sair() {},
   }
 }

@@ -5,9 +5,8 @@ import Moldura from './Moldura'
 import Treino from './screens/Treino'
 import type { Item } from './types'
 
-// Mude este número para obrigar todos os celulares a digitar a senha da equipe e
-// ver o convite do tutorial de novo na próxima vez que abrirem o app (com internet).
-// O nome de cada pessoa continua salvo.
+// Mude este número para que todos os celulares vejam o convite do tutorial de novo
+// na próxima vez que abrirem o app. O nome de cada pessoa continua salvo.
 const VERSAO_ACESSO = '2'
 
 export default function App() {
@@ -16,16 +15,14 @@ export default function App() {
   const [erro, setErro] = useState('')
   const [operador, setOperador] = useState(() => lembrado('operador'))
   const [manualVisto, setManualVisto] = useState(() => lembrado('manualVisto') === '1')
-  // undefined = ainda conferindo se este aparelho já entrou com a senha
+  // undefined = ainda conferindo se o aparelho já está conectado (login automático)
   const [logado, setLogado] = useState<boolean | undefined>(undefined)
   const [online, setOnline] = useState(navigator.onLine)
   const rota = useRota()
 
   useEffect(() => {
-    criarStore().then(async (s) => {
-      // Só com internet: sair sem sinal poderia perder o que ainda não subiu.
-      if (lembrado('versaoAcesso') !== VERSAO_ACESSO && navigator.onLine) {
-        await s.sair()
+    criarStore().then((s) => {
+      if (lembrado('versaoAcesso') !== VERSAO_ACESSO) {
         lembrar('manualVisto', '')
         setManualVisto(false)
         lembrar('versaoAcesso', VERSAO_ACESSO)
@@ -50,7 +47,7 @@ export default function App() {
 
   if (erro) return <Mensagem>Não foi possível abrir o banco de dados: {erro}</Mensagem>
   if (!store || logado === undefined) return <Mensagem>Carregando…</Mensagem>
-  if (!logado) return <PedeSenha store={store} />
+  if (!logado) return <Mensagem>Conectando… Na primeira vez neste celular precisa de internet.</Mensagem>
   if (!operador) return <PerguntaNome onPronto={(n) => (lembrar('operador', n), setOperador(n))} />
   const emTreino = rota.partes[0] === 'treino'
   // Terminar (ou pular) o treino da primeira vez libera o app de verdade.
@@ -101,54 +98,6 @@ function ConviteTreino({ onPular }: { onPular: () => void }) {
 
 function Mensagem({ children }: { children: React.ReactNode }) {
   return <div className="mensagem">{children}</div>
-}
-
-function PedeSenha({ store }: { store: Store }) {
-  const [senha, setSenha] = useState('')
-  const [erro, setErro] = useState('')
-  const [ocupado, setOcupado] = useState(false)
-  return (
-    <form
-      className="pergunta-nome"
-      onSubmit={async (e) => {
-        e.preventDefault()
-        setErro('')
-        setOcupado(true)
-        try {
-          await store.entrar(senha)
-        } catch {
-          setErro(
-            navigator.onLine
-              ? 'Senha errada. Confira com o responsável.'
-              : 'Sem internet. Na primeira vez precisa de sinal.',
-          )
-        } finally {
-          setOcupado(false)
-        }
-      }}
-    >
-      <img src="icon.svg" alt="" width={72} height={72} />
-      <h1>Inventário Chácara</h1>
-      <p>Digite a senha da equipe. Só precisa fazer isso uma vez neste celular.</p>
-      <input
-        autoFocus
-        type="password"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        placeholder="Senha da equipe"
-        autoComplete="current-password"
-      />
-      {erro && <p className="erro">{erro}</p>}
-      <button className={`botao principal${ocupado ? ' ocupado' : ''}`} disabled={!senha}>
-        Entrar
-      </button>
-      {store.modo === 'local' && (
-        <p className="aviso">
-          <strong>Modo demonstração:</strong> qualquer senha entra.
-        </p>
-      )}
-    </form>
-  )
 }
 
 function PerguntaNome({ onPronto }: { onPronto: (nome: string) => void }) {

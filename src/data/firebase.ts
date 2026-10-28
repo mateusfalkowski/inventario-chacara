@@ -1,11 +1,11 @@
-// Firebase no plano gratuito (Spark): Firestore + uma conta única da equipe
-// (e-mail fixo em VITE_EQUIPE_EMAIL, o funcionário só digita a senha).
+// Firebase no plano gratuito (Spark): Firestore + login anônimo automático
+// (sem senha: o app entra sozinho ao abrir).
 // Sem Cloud Storage (exige plano pago), então a foto comprimida vai num
 // documento próprio em `fotos/{id}` e a miniatura dentro do item.
 // Se o projeto crescer (plano Blaze), dá para migrar as fotos para o Storage
 // trocando só a função `foto` e a gravação em `adicionar`.
 import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { getAuth, onAuthStateChanged, signInAnonymously } from 'firebase/auth'
 import {
   arrayRemove,
   arrayUnion,
@@ -19,7 +19,6 @@ import {
   persistentMultipleTabManager,
   setDoc,
   updateDoc,
-  waitForPendingWrites,
 } from 'firebase/firestore'
 import type { Item } from '../types'
 import { variacao, type Store } from './store'
@@ -39,9 +38,18 @@ export async function criarStoreFirebase(): Promise<Store> {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
   })
 
-  // As regras do banco exigem login; o login fica salvo no aparelho, então
-  // depois de digitar a senha uma vez funciona offline também.
+  // Sem senha: o app entra sozinho com um login anônimo. As regras do banco só
+  // exigem estar logado (quem não abre o app não lê nem grava). O login fica salvo
+  // no aparelho, então depois da primeira vez com internet funciona offline também.
   const auth = getAuth(app)
+  const entrarSozinho = () => {
+    if (!auth.currentUser) signInAnonymously(auth).catch((e) => console.error('Login automático falhou', e))
+  }
+  onAuthStateChanged(auth, (user) => {
+    if (!user) entrarSozinho()
+  })
+  // Primeira vez sem internet: tenta de novo quando o sinal voltar.
+  window.addEventListener('online', entrarSozinho)
   const logado = new Promise<void>((ok) => {
     const parar = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -57,8 +65,8 @@ export async function criarStoreFirebase(): Promise<Store> {
     modo: 'firebase',
     observar(cb) {
       // A lista acompanha o login: liga ao entrar, desliga (e esvazia) ao sair e
-      // religa no próximo login. Sem isso, depois de "Sair" (ou de a senha da
-      // equipe ser trocada, o que desloga todo mundo) a lista ficava congelada.
+      // religa no próximo login. Sem isso, se o login cair e voltar, a lista
+      // ficaria congelada.
       let cancelarLista = () => {}
       const pararLogin = onAuthStateChanged(auth, (user) => {
         cancelarLista()
@@ -115,15 +123,6 @@ export async function criarStoreFirebase(): Promise<Store> {
     },
     observarLogin(cb) {
       return onAuthStateChanged(auth, (user) => cb(Boolean(user)))
-    },
-    async entrar(senha) {
-      await signInWithEmailAndPassword(auth, env.VITE_EQUIPE_EMAIL ?? '', senha)
-    },
-    async sair() {
-      // Antes de sair, espera subir o que foi gravado sem internet (até 8 s): depois
-      // de sair, o banco recusaria essas gravações e elas se perderiam.
-      await Promise.race([waitForPendingWrites(db), new Promise((ok) => setTimeout(ok, 8000))])
-      await signOut(auth)
     },
   }
 }

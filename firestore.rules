@@ -1,24 +1,22 @@
 rules_version = '2';
 
-// Só quem entrou com a senha da equipe (login por e-mail e senha) lê e grava.
-// No console, em Authentication → Configurações → Ações do usuário, desmarque
-// "Ativar criação (inscrição)": assim ninguém cria conta própria pela API e a
-// única conta que existe é a da equipe.
+// Sem senha: o app entra sozinho com login anônimo do Firebase (Authentication →
+// Método de login → Anônimo precisa estar ativado). Basta estar logado para ler e
+// gravar; quem não abre o app não acessa o banco. Ninguém apaga itens nem fotos.
 service cloud.firestore {
   match /databases/{database}/documents {
-    function equipe() {
-      return request.auth != null
-        && request.auth.token.firebase.sign_in_provider == 'password';
+    function logado() {
+      return request.auth != null;
     }
 
     match /itens/{id} {
-      allow read: if equipe();
-      allow create, update: if equipe()
+      allow read: if logado();
+      allow create, update: if logado()
         && request.resource.data.quantidade >= 0;
       allow delete: if false;
     }
     match /fotos/{id} {
-      allow read, create: if equipe();
+      allow read, create: if logado();
       allow update, delete: if false;
     }
   }
