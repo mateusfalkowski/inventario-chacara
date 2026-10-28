@@ -43,7 +43,8 @@ export default function Moldura({ store, itens, operador, online, partes, busca,
           {store.modo === 'local' && <span className="selo">Modo demonstração</span>}
         </span>
       </header>
-      <main className="conteudo">
+      {/* A planilha usa a largura toda da tela no computador; o resto fica na largura de celular. */}
+      <main className={`conteudo${tela === 'planilha' ? ' conteudo-largo' : ''}`}>
         {tela === 'novo' ? (
           // key: trocar de "peça do conjunto X" para cadastro avulso recomeça o formulário.
           <NovoItem key={busca.get('pai') ?? ''} pai={busca.get('pai') ?? undefined} />

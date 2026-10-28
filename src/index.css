@@ -1877,3 +1877,75 @@ input:focus {
 .grade td {
   white-space: nowrap;
 }
+
+/* ---------- Planilha no computador: largura toda, sem rolar de lado ---------- */
+
+.conteudo-largo {
+  max-width: 1600px;
+}
+
+@media (min-width: 900px) {
+  .conteudo-largo .tabela-rolagem {
+    margin: 0.6rem 0 0;
+    max-height: calc(100vh - 15rem);
+    border: 1px solid var(--linha);
+    border-radius: 12px;
+  }
+
+  .conteudo-largo .abas {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+  }
+
+  /* Texto pode quebrar em duas linhas; números, códigos e datas continuam numa linha só. */
+  .conteudo-largo .grade td {
+    white-space: normal;
+  }
+
+  .conteudo-largo .grade td.num,
+  .conteudo-largo .grade td.codigo,
+  .conteudo-largo .grade td.nao-quebra {
+    white-space: nowrap;
+  }
+
+  .conteudo-largo .grade th,
+  .conteudo-largo .grade td {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+
+  .conteudo-largo .grade .forte {
+    min-width: 9rem;
+  }
+
+  /* Filtros encolhem com a coluna em vez de forçar largura mínima. */
+  .conteudo-largo .linha-filtros select,
+  .conteudo-largo .linha-filtros input {
+    min-width: 0;
+  }
+
+  .conteudo-largo .th-ordenar {
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+/* Notebook menor (até 1400 px): letra e espaçamento um pouco menores para caber tudo. */
+@media (min-width: 900px) and (max-width: 1400px) {
+  .conteudo-largo .grade {
+    font-size: 0.8rem;
+  }
+  .conteudo-largo .grade th,
+  .conteudo-largo .grade td {
+    padding-left: 0.32rem;
+    padding-right: 0.32rem;
+  }
+  .conteudo-largo .grade .forte {
+    min-width: 7.5rem;
+  }
+  .conteudo-largo .grade .selo-estado {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.4rem;
+  }
+}
