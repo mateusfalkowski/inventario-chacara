@@ -2003,3 +2003,10 @@ body.arrastando-coluna {
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* No celular a tabela mantém a largura somada das colunas e rola de lado. */
+@media (max-width: 899px) {
+  .grade.fixa {
+    min-width: var(--soma);
+  }
+}

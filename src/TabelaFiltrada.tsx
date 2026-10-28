@@ -19,6 +19,9 @@ export interface Coluna<T> {
   /** Texto mostrado no seletor para cada valor (padrão: o próprio valor). */
   rotulo?: (valor: string) => string
   classe?: string
+  /** Largura inicial em px. Na tela larga as colunas mantêm essas proporções e
+   *  esticam/encolhem juntas para caber; no celular, a soma vira a largura mínima. */
+  largura: number
 }
 
 interface Props<T> {
@@ -51,6 +54,8 @@ export default function TabelaFiltrada<T>({ id, linhas, colunas, chave, aoTocar 
     }
   })
   useEffect(() => lembrar(chaveLarguras, larguras ? JSON.stringify(larguras) : ''), [chaveLarguras, larguras])
+
+  const somaPadrao = colunas.reduce((t, c) => t + c.largura, 0)
 
   const medirColunas = () => {
     const ths = tabela.current?.querySelectorAll<HTMLElement>('thead tr:first-child th') ?? []
@@ -143,16 +148,23 @@ export default function TabelaFiltrada<T>({ id, linhas, colunas, chave, aoTocar 
       <div className="tabela-rolagem">
         <table
           ref={tabela}
-          className={`grade${larguras ? ' fixa' : ''}`}
-          style={larguras ? { width: colunas.reduce((t, c) => t + larguras[c.id], 0) } : undefined}
+          className="grade fixa"
+          // --soma: largura mínima só no celular (no computador a tabela encolhe para caber).
+          style={
+            larguras
+              ? { width: colunas.reduce((t, c) => t + larguras[c.id], 0) }
+              : ({ width: '100%', '--soma': `${somaPadrao}px` } as React.CSSProperties)
+          }
         >
-          {larguras && (
-            <colgroup>
-              {colunas.map((c) => (
-                <col key={c.id} style={{ width: larguras[c.id] }} />
-              ))}
-            </colgroup>
-          )}
+          <colgroup>
+            {colunas.map((c) => (
+              <col
+                key={c.id}
+                // Sem ajuste manual: cada coluna fica com a sua fatia da largura total.
+                style={{ width: larguras ? larguras[c.id] : `${(c.largura / somaPadrao) * 100}%` }}
+              />
+            ))}
+          </colgroup>
           <thead>
             <tr>
               {colunas.map((c) => (
