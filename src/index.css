@@ -1949,3 +1949,57 @@ input:focus {
     padding: 0.1rem 0.4rem;
   }
 }
+
+/* ---------- Arrastar a borda das colunas (como no Excel) ---------- */
+
+.alca {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 3;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.alca::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  right: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0.35);
+}
+
+.alca:hover::after,
+.alca:active::after {
+  top: 0;
+  bottom: 0;
+  background: #f2b134;
+}
+
+/* Com larguras escolhidas, a tabela respeita cada coluna e corta o que não cabe com "…". */
+.grade.fixa {
+  table-layout: fixed;
+}
+
+.grade.fixa th,
+.grade.fixa td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grade.fixa .forte,
+.conteudo-largo .grade.fixa .forte {
+  min-width: 0;
+}
+
+/* Enquanto arrasta: cursor de redimensionar na tela toda e sem selecionar texto. */
+body.arrastando-coluna {
+  cursor: col-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}

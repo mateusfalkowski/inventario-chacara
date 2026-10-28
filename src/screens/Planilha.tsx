@@ -149,17 +149,18 @@ export default function Planilha() {
       )}
 
       {aba === 'estoque' && (
-        <TabelaFiltrada linhas={r.estoque} colunas={COL_ESTOQUE} chave={(l) => l.item.id} aoTocar={abrir} />
+        <TabelaFiltrada id="estoque" linhas={r.estoque} colunas={COL_ESTOQUE} chave={(l) => l.item.id} aoTocar={abrir} />
       )}
       {aba === 'movimentos' && (
         <TabelaFiltrada
+          id="movimentos"
           linhas={r.movimentos}
           colunas={COL_MOVIMENTOS}
           chave={(m, i) => `${m.item.id}-${m.em}-${i}`}
           aoTocar={abrir}
         />
       )}
-      {aba === 'saidos' && <TabelaFiltrada linhas={r.saidos} colunas={COL_SAIDOS} chave={(s) => s.item.id} aoTocar={abrir} />}
+      {aba === 'saidos' && <TabelaFiltrada id="saidos" linhas={r.saidos} colunas={COL_SAIDOS} chave={(s) => s.item.id} aoTocar={abrir} />}
     </div>
   )
 }

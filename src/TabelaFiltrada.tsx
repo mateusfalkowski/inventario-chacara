@@ -1,7 +1,10 @@
 // Tabela com filtro em cada coluna, como o filtro do Excel: colunas de lista
 // (estado, categoria, local…) têm um seletor com os valores que existem; colunas
 // de texto têm um campo de busca. Tocar no título da coluna ordena (A→Z, Z→A).
-import { useMemo, useState, type ReactNode } from 'react'
+// A borda direita de cada título arrasta para mudar a largura da coluna (como no
+// Excel); a largura fica salva neste navegador. Duplo clique na borda: automática.
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { lembrado, lembrar } from './app-context'
 import { semAcento } from './lib/util'
 
 export interface Coluna<T> {
@@ -19,6 +22,8 @@ export interface Coluna<T> {
 }
 
 interface Props<T> {
+  /** Identifica a tabela para guardar as larguras das colunas. */
+  id: string
   linhas: T[]
   colunas: Coluna<T>[]
   chave: (l: T, i: number) => string
@@ -27,9 +32,52 @@ interface Props<T> {
 
 type Ordem = { col: string; dir: 1 | -1 } | null
 
-export default function TabelaFiltrada<T>({ linhas, colunas, chave, aoTocar }: Props<T>) {
+const LARGURA_MIN = 44
+
+export default function TabelaFiltrada<T>({ id, linhas, colunas, chave, aoTocar }: Props<T>) {
   const [filtros, setFiltros] = useState<Record<string, string>>({})
   const [ordem, setOrdem] = useState<Ordem>(null)
+  const tabela = useRef<HTMLTableElement>(null)
+  const chaveLarguras = `colunas:${id}`
+
+  // null = larguras automáticas. Depois que alguém arrasta uma borda, todas as
+  // colunas passam a ter largura fixa (senão o navegador redistribuiria o resto).
+  const [larguras, setLarguras] = useState<Record<string, number> | null>(() => {
+    try {
+      const salvo = JSON.parse(lembrado(chaveLarguras) || 'null') as Record<string, number> | null
+      return salvo && colunas.every((c) => typeof salvo[c.id] === 'number') ? salvo : null
+    } catch {
+      return null
+    }
+  })
+  useEffect(() => lembrar(chaveLarguras, larguras ? JSON.stringify(larguras) : ''), [chaveLarguras, larguras])
+
+  const medirColunas = () => {
+    const ths = tabela.current?.querySelectorAll<HTMLElement>('thead tr:first-child th') ?? []
+    return Object.fromEntries(colunas.map((c, i) => [c.id, Math.round(ths[i]?.getBoundingClientRect().width ?? 100)]))
+  }
+
+  function arrastar(e: PointerEvent<HTMLSpanElement>, col: string) {
+    e.preventDefault()
+    e.stopPropagation()
+    const base = larguras ?? medirColunas()
+    const inicioX = e.clientX
+    const inicioL = base[col]
+    setLarguras(base)
+    // Ouve a janela toda: o mouse pode sair da borda fina enquanto arrasta.
+    const mover = (ev: globalThis.PointerEvent) =>
+      setLarguras((l) => ({ ...(l ?? base), [col]: Math.max(LARGURA_MIN, Math.round(inicioL + ev.clientX - inicioX)) }))
+    const soltar = () => {
+      window.removeEventListener('pointermove', mover)
+      window.removeEventListener('pointerup', soltar)
+      window.removeEventListener('pointercancel', soltar)
+      document.body.classList.remove('arrastando-coluna')
+    }
+    window.addEventListener('pointermove', mover)
+    window.addEventListener('pointerup', soltar)
+    window.addEventListener('pointercancel', soltar)
+    document.body.classList.add('arrastando-coluna')
+  }
 
   // Valores de cada coluna de lista, para montar o seletor (só os que existem).
   const opcoes = useMemo(() => {
@@ -86,9 +134,25 @@ export default function TabelaFiltrada<T>({ linhas, colunas, chave, aoTocar }: P
             Limpar filtros{ativos > 0 ? ` (${ativos})` : ''}
           </button>
         )}
+        {larguras && (
+          <button className="link" onClick={() => setLarguras(null)}>
+            Restaurar colunas
+          </button>
+        )}
       </div>
       <div className="tabela-rolagem">
-        <table className="grade">
+        <table
+          ref={tabela}
+          className={`grade${larguras ? ' fixa' : ''}`}
+          style={larguras ? { width: colunas.reduce((t, c) => t + larguras[c.id], 0) } : undefined}
+        >
+          {larguras && (
+            <colgroup>
+              {colunas.map((c) => (
+                <col key={c.id} style={{ width: larguras[c.id] }} />
+              ))}
+            </colgroup>
+          )}
           <thead>
             <tr>
               {colunas.map((c) => (
@@ -97,6 +161,15 @@ export default function TabelaFiltrada<T>({ linhas, colunas, chave, aoTocar }: P
                     {c.titulo}
                     <span className="seta">{ordem?.col === c.id ? (ordem.dir === 1 ? '▲' : '▼') : ''}</span>
                   </button>
+                  <span
+                    className="alca"
+                    role="separator"
+                    aria-orientation="vertical"
+                    aria-label={`Mudar a largura da coluna ${c.titulo}`}
+                    title="Arraste para mudar a largura (duplo clique: automática)"
+                    onPointerDown={(e) => arrastar(e, c.id)}
+                    onDoubleClick={() => setLarguras(null)}
+                  />
                 </th>
               ))}
             </tr>
