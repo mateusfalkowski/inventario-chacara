@@ -8,6 +8,7 @@ import ItemDetalhe from './screens/ItemDetalhe'
 import Manual from './screens/Manual'
 import NovoItem from './screens/NovoItem'
 import Painel from './screens/Painel'
+import Planilha from './screens/Planilha'
 import Saida from './screens/Saida'
 import type { Item } from './types'
 
@@ -60,6 +61,8 @@ export default function Moldura({ store, itens, operador, online, partes, busca,
           <Manual />
         ) : tela === 'painel' ? (
           <Painel />
+        ) : tela === 'planilha' ? (
+          <Planilha />
         ) : (
           <Inicio trocarNome={trocarNome} />
         )}

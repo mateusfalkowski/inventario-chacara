@@ -1,13 +1,15 @@
 // Visão do gestor: o que tem, o que está parado e para onde as coisas foram.
 // "Parados" responde ao pedido do parceiro de não deixar material encalhar.
+import { useState } from 'react'
 import { ir, useApp } from '../app-context'
 import { CartaoItem } from '../components'
 import { CATEGORIAS, DESTINOS, DIAS_PARADO, ESTADOS, destino } from '../config'
-import { baixarArquivo, itensParaCsv } from '../lib/csv'
+import { baixarPlanilha } from '../lib/planilha'
 import { diasDesde } from '../lib/util'
 
 export default function Painel() {
   const { itens } = useApp()
+  const [gerando, setGerando] = useState(false)
   const emEstoque = itens.filter((i) => i.quantidade > 0)
   const semana = Date.now() - 7 * 86_400_000
   const novosSemana = itens.filter((i) => i.criadoEm >= semana).length
@@ -36,7 +38,17 @@ export default function Painel() {
     n: saidas.filter((m) => m.destino === d.id).length,
   })).filter((x) => x.n > 0)
 
-  const data = new Date().toISOString().slice(0, 10)
+  async function planilha() {
+    setGerando(true)
+    try {
+      await baixarPlanilha(itens)
+    } catch (e) {
+      console.error(e)
+      alert('Não foi possível gerar a planilha. Tente de novo com internet.')
+    } finally {
+      setGerando(false)
+    }
+  }
 
   return (
     <div className="painel">
@@ -89,12 +101,15 @@ export default function Painel() {
 
       <h2>Exportar</h2>
       <div className="botoes-coluna">
-        <button className="botao" onClick={() => baixarArquivo(`estoque-${data}.csv`, itensParaCsv(emEstoque))}>
-          📄 Planilha do estoque (Excel)
-        </button>
-        <button className="botao" onClick={() => baixarArquivo(`historico-completo-${data}.csv`, itensParaCsv(itens))}>
-          📄 Planilha completa (com o que já saiu)
-        </button>
+        <p className="fraco nota-planilha">Relatório com resumo, estoque com fotos, movimentações e o que já saiu.</p>
+        <div className="botoes-lado escolha-planilha">
+          <button className="botao principal" onClick={() => ir('/planilha')}>
+            📋 Ver planilha aqui
+          </button>
+          <button className={`botao${gerando ? ' ocupado' : ''}`} onClick={planilha} disabled={gerando}>
+            {gerando ? 'Gerando…' : '⬇️ Baixar Excel'}
+          </button>
+        </div>
         <button
           className="botao"
           onClick={() => emEstoque.length && ir(`/etiqueta/${emEstoque.map((i) => i.id).join(',')}`)}

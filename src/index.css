@@ -1608,3 +1608,272 @@ input:focus {
   display: block;
   margin-top: 0.15rem;
 }
+
+.nota-planilha {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+}
+
+/* ---------- Planilha no app ---------- */
+
+.escolha-planilha .botao {
+  flex: 1;
+}
+
+.planilha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.planilha-topo h1 {
+  margin-bottom: 0.4rem;
+}
+
+.planilha-topo .botao {
+  width: auto;
+  margin: 0;
+  min-height: 2.6rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.92rem;
+}
+
+.abas {
+  display: flex;
+  gap: 0.3rem;
+  margin: 0.5rem -1rem 0.6rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 2px solid var(--linha);
+}
+
+.abas button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  color: var(--fraco);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.abas button.ativo {
+  color: var(--verde);
+  border-bottom-color: var(--verde);
+}
+
+.abas-n {
+  min-width: 1.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 99px;
+  background: var(--verde-claro);
+  color: var(--verde);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* Tabela larga rola de lado dentro da sua caixa; o cabeçalho fica fixo ao rolar para baixo. */
+.tabela-rolagem {
+  margin: 0.6rem -1rem 0;
+  max-height: 68vh;
+  overflow: auto;
+  border-top: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha);
+  background: var(--papel);
+}
+
+.grade {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.grade th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.55rem 0.6rem;
+  background: var(--verde);
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.grade td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--linha);
+  vertical-align: middle;
+}
+
+.grade td small {
+  display: block;
+  color: var(--fraco);
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.grade tbody tr {
+  cursor: pointer;
+}
+
+.grade tbody tr:nth-child(even) {
+  background: rgb(31 42 34 / 0.025);
+}
+
+.grade tbody tr:active,
+.grade tbody tr:hover {
+  background: var(--verde-claro);
+}
+
+.grade .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.grade .forte {
+  font-weight: 600;
+  min-width: 10rem;
+}
+
+.grade .codigo {
+  white-space: nowrap;
+}
+
+.grade .nao-quebra {
+  white-space: nowrap;
+}
+
+.grade .parado {
+  background: var(--alerta);
+  color: #8a5a00;
+  font-weight: 700;
+}
+
+.grade .miniatura {
+  border-radius: 8px;
+}
+
+.tipo {
+  font-weight: 700;
+}
+
+.tipo-entrada {
+  color: #2e7d4f;
+}
+
+.tipo-saida {
+  color: #c27c0e;
+}
+
+.tipo-ajuste {
+  color: var(--fraco);
+}
+
+.resumo-grade {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.grade.resumo {
+  border-radius: var(--raio);
+  overflow: hidden;
+  background: var(--papel);
+  box-shadow: var(--sombra-1);
+}
+
+.grade.resumo tbody tr {
+  cursor: default;
+}
+
+.grade.resumo td.num {
+  font-weight: 700;
+}
+
+.grade .selo-estado {
+  white-space: nowrap;
+}
+
+/* ---------- Filtros nas colunas da planilha ---------- */
+
+.filtros-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+}
+
+.th-ordenar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.th-ordenar .seta {
+  font-size: 0.65rem;
+  min-width: 0.6rem;
+}
+
+.grade th.num .th-ordenar {
+  margin-left: auto;
+}
+
+/* Segunda linha do cabeçalho: um filtro por coluna, preso junto com o título. */
+.grade .linha-filtros th {
+  top: 2.15rem;
+  padding: 0.25rem 0.35rem 0.4rem;
+  background: #3a6a46;
+}
+
+.linha-filtros select,
+.linha-filtros input {
+  width: 100%;
+  min-width: 6.5rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--tinta);
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.linha-filtros select.ativo,
+.linha-filtros input.ativo {
+  border-color: #f2b134;
+  background: #fff4d6;
+  font-weight: 600;
+}
+
+.grade td .parado {
+  display: inline-block;
+  min-width: 2rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: var(--alerta);
+  color: #8a5a00;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Uma linha por célula: a tabela já rola de lado, então as linhas ficam baixas e fáceis de ler. */
+.grade td {
+  white-space: nowrap;
+}

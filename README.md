@@ -20,7 +20,8 @@ foto primeiro, e funciona **sem internet** (sincroniza quando o sinal volta).
 | **Etiqueta** | Etiqueta com QR para imprimir. A câmera de qualquer celular lê o QR e abre a ficha do item. |
 | **Dar saída** | Venda, doação, artesãos, uso interno, reciclagem ou descarte (já vem marcado o destino previsto). Aceita saída parcial. |
 | **Estoque** | Busca por código/nome/local, filtro por categoria. |
-| **Painel** | Totais por estado/categoria, destino previsto do estoque, destinos das saídas, itens **parados há +90 dias**, exportar planilha (Excel) e imprimir todas as etiquetas. |
+| **Painel** | Totais por estado/categoria, destino previsto do estoque, destinos das saídas, itens **parados há +90 dias** e imprimir todas as etiquetas. |
+| **Planilha** | Relatório em abas (Resumo, Estoque com fotos, Movimentações, Já saíram). Dá para **ver no próprio app**, com filtro e ordenação em cada coluna, ou **baixar em Excel** (.xlsx formatado, com filtro em cada coluna e fotos). |
 
 As listas de categorias, estados, locais e destinos ficam em [`src/config.ts`](src/config.ts) —
 é ali que entram as definições das Equipes 3 (classificação) e 5 (layout do depósito).
