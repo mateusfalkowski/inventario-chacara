@@ -1,6 +1,7 @@
 // Planilha dentro do próprio app: as mesmas abas do arquivo Excel (resumo,
-// estoque, movimentações e o que já saiu), com filtro e ordenação em cada coluna
-// e toque na linha para abrir a ficha. Para levar ao computador, "Baixar Excel".
+// estoque, movimentações e o que já saiu). Visão enxuta por padrão (foto, nome e
+// código juntos; quantidade com unidade; data com quem cadastrou) e colunas pouco
+// usadas escondidas em "Colunas". Filtro e ordem no menu ▾ de cada título.
 import { useMemo, useState } from 'react'
 import { ir, useApp } from '../app-context'
 import { Miniatura, SeloEstado } from '../components'
@@ -8,76 +9,161 @@ import { estado } from '../config'
 import { baixarPlanilha } from '../lib/planilha'
 import { TIPOS, montarRelatorio, type LinhaEstoque, type LinhaMovimento, type LinhaSaido } from '../lib/relatorio'
 import { dataCurta, qtd } from '../lib/util'
+import type { Item } from '../types'
 import TabelaFiltrada, { type Coluna } from '../TabelaFiltrada'
 
 type Aba = 'resumo' | 'estoque' | 'movimentos' | 'saidos'
 
-const dataHora = (ms: number) =>
-  new Date(ms).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+const hora = (ms: number) => new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+/** Foto + nome em destaque + código embaixo: identifica o material numa célula só. */
+const celulaMaterial = (item: Item, nome: string) => (
+  <div className="celula-material">
+    <Miniatura item={item} tamanho={40} />
+    <div>
+      <strong>{nome}</strong>
+      <small className="codigo">{item.id}</small>
+    </div>
+  </div>
+)
+
+const duasLinhas = (cima: string, baixo: string) => (
+  <div className="duas-linhas">
+    {cima}
+    <small>{baixo}</small>
+  </div>
+)
 
 const COL_ESTOQUE: Coluna<LinhaEstoque>[] = [
-  { id: 'foto', largura: 56, titulo: 'Foto', valor: () => '', mostrar: (l) => <Miniatura item={l.item} tamanho={38} />, filtro: 'nenhum' },
-  { id: 'codigo', largura: 92, titulo: 'Código', valor: (l) => l.item.id, filtro: 'texto', classe: 'codigo' },
-  { id: 'material', largura: 196, titulo: 'Material', valor: (l) => l.material, filtro: 'texto', classe: 'forte' },
-  { id: 'categoria', largura: 144, titulo: 'Categoria', valor: (l) => l.categoria, filtro: 'lista' },
-  { id: 'estado', largura: 144, titulo: 'Estado', valor: (l) => estado(l.estado).nome, mostrar: (l) => <SeloEstado id={l.estado} />, filtro: 'lista' },
-  // Só o número: a unidade já tem coluna própria ao lado.
-  { id: 'qtd', largura: 70, titulo: 'Qtd.', valor: (l) => l.quantidade, mostrar: (l) => l.quantidade.toLocaleString('pt-BR'), filtro: 'nenhum', classe: 'num' },
-  { id: 'unidade', largura: 100, titulo: 'Unidade', valor: (l) => l.unidade, filtro: 'lista', classe: 'nao-quebra' },
-  { id: 'local', largura: 100, titulo: 'Local', valor: (l) => l.local, filtro: 'lista', classe: 'nao-quebra' },
-  { id: 'destino', largura: 124, titulo: 'Destino previsto', valor: (l) => l.destino, filtro: 'lista' },
-  { id: 'conjunto', largura: 116, titulo: 'Conjunto', valor: (l) => l.conjunto, filtro: 'texto' },
-  { id: 'origem', largura: 124, titulo: 'Obra de origem', valor: (l) => l.origem, filtro: 'lista' },
-  { id: 'cadastro', largura: 98, titulo: 'Cadastrado em', valor: (l) => l.criadoEm, mostrar: (l) => dataCurta(l.criadoEm), filtro: 'nenhum', classe: 'nao-quebra' },
-  { id: 'por', largura: 112, titulo: 'Cadastrado por', valor: (l) => l.criadoPor, filtro: 'lista', classe: 'nao-quebra' },
   {
-    id: 'parado', largura: 82,
+    id: 'material',
+    titulo: 'Material',
+    largura: 285,
+    valor: (l) => l.material,
+    mostrar: (l) => celulaMaterial(l.item, l.material),
+    busca: (l) => `${l.item.id} ${l.origem}`,
+    filtro: 'texto',
+  },
+  { id: 'categoria', titulo: 'Categoria', largura: 150, valor: (l) => l.categoria, filtro: 'lista' },
+  {
+    id: 'estado',
+    titulo: 'Estado',
+    largura: 130,
+    valor: (l) => estado(l.estado).nome,
+    mostrar: (l) => <SeloEstado id={l.estado} />,
+    filtro: 'lista',
+  },
+  {
+    id: 'qtd',
+    titulo: 'Quantidade',
+    largura: 128,
+    valor: (l) => l.quantidade,
+    mostrar: (l) => qtd(l.quantidade, l.unidade),
+    filtro: 'nenhum',
+    classe: 'num',
+  },
+  { id: 'local', titulo: 'Local', largura: 110, valor: (l) => l.local, filtro: 'lista' },
+  { id: 'destino', titulo: 'Destino previsto', largura: 140, valor: (l) => l.destino, filtro: 'lista' },
+  { id: 'conjunto', titulo: 'Conjunto', largura: 130, valor: (l) => l.conjunto, filtro: 'texto' },
+  {
+    id: 'cadastro',
+    titulo: 'Cadastro',
+    largura: 120,
+    valor: (l) => l.criadoEm,
+    mostrar: (l) => duasLinhas(dataCurta(l.criadoEm), `por ${l.criadoPor}`),
+    filtro: 'nenhum',
+  },
+  {
+    id: 'parado',
     titulo: 'Dias parado',
+    largura: 100,
     valor: (l) => l.diasParado,
     mostrar: (l) => <span className={l.parado ? 'parado' : ''}>{l.diasParado}</span>,
     filtro: 'nenhum',
     classe: 'num',
   },
+  // Escondidas por padrão (dá para mostrar em "Colunas").
+  { id: 'origem', titulo: 'Obra de origem', largura: 150, valor: (l) => l.origem, filtro: 'lista', oculta: true },
+  { id: 'por', titulo: 'Cadastrado por', largura: 130, valor: (l) => l.criadoPor, filtro: 'lista', oculta: true },
+  { id: 'unidade', titulo: 'Unidade', largura: 100, valor: (l) => l.unidade, filtro: 'lista', oculta: true },
 ]
 
 const COL_MOVIMENTOS: Coluna<LinhaMovimento>[] = [
-  { id: 'data', largura: 128, titulo: 'Data', valor: (m) => m.em, mostrar: (m) => dataHora(m.em), filtro: 'nenhum', classe: 'nao-quebra' },
-  { id: 'codigo', largura: 84, titulo: 'Código', valor: (m) => m.item.id, filtro: 'texto', classe: 'codigo' },
-  { id: 'material', largura: 220, titulo: 'Material', valor: (m) => m.material, filtro: 'texto', classe: 'forte' },
   {
-    id: 'tipo', largura: 96,
+    id: 'data',
+    titulo: 'Data',
+    largura: 110,
+    valor: (m) => m.em,
+    mostrar: (m) => duasLinhas(dataCurta(m.em), hora(m.em)),
+    filtro: 'nenhum',
+  },
+  {
+    id: 'material',
+    titulo: 'Material',
+    largura: 280,
+    valor: (m) => m.material,
+    mostrar: (m) => celulaMaterial(m.item, m.material),
+    busca: (m) => m.item.id,
+    filtro: 'texto',
+  },
+  {
+    id: 'tipo',
     titulo: 'Tipo',
+    largura: 110,
     valor: (m) => TIPOS[m.tipo],
-    mostrar: (m) => <span className={`tipo tipo-${m.tipo}`}>{TIPOS[m.tipo]}</span>,
+    mostrar: (m) => <span className={`pilula tipo-${m.tipo}`}>{TIPOS[m.tipo]}</span>,
     filtro: 'lista',
   },
   {
-    id: 'qtd', largura: 110,
-    titulo: 'Qtd.',
+    id: 'qtd',
+    titulo: 'Quantidade',
+    largura: 120,
     valor: (m) => m.quantidade,
     mostrar: (m) => `${m.tipo === 'ajuste' && m.quantidade > 0 ? '+' : ''}${qtd(m.quantidade, m.unidade)}`,
     filtro: 'nenhum',
     classe: 'num',
   },
-  { id: 'destino', largura: 128, titulo: 'Destino', valor: (m) => m.destino, filtro: 'lista' },
-  { id: 'obs', largura: 260, titulo: 'Observação', valor: (m) => m.obs, filtro: 'texto' },
-  { id: 'por', largura: 112, titulo: 'Por', valor: (m) => m.por, filtro: 'lista' },
+  { id: 'destino', titulo: 'Destino', largura: 140, valor: (m) => m.destino, filtro: 'lista' },
+  { id: 'obs', titulo: 'Observação', largura: 260, valor: (m) => m.obs, filtro: 'texto' },
+  { id: 'por', titulo: 'Por', largura: 120, valor: (m) => m.por, filtro: 'lista' },
 ]
 
 const COL_SAIDOS: Coluna<LinhaSaido>[] = [
-  { id: 'codigo', largura: 84, titulo: 'Código', valor: (s) => s.item.id, filtro: 'texto', classe: 'codigo' },
-  { id: 'material', largura: 230, titulo: 'Material', valor: (s) => s.material, filtro: 'texto', classe: 'forte' },
-  { id: 'categoria', largura: 160, titulo: 'Categoria', valor: (s) => s.categoria, filtro: 'lista' },
-  { id: 'estado', largura: 128, titulo: 'Estado', valor: (s) => estado(s.estado).nome, mostrar: (s) => <SeloEstado id={s.estado} />, filtro: 'lista' },
-  { id: 'total', largura: 128, titulo: 'Total que saiu', valor: (s) => s.total, mostrar: (s) => qtd(s.total, s.unidade), filtro: 'nenhum', classe: 'num' },
-  { id: 'destinos', largura: 190, titulo: 'Destinos', valor: (s) => s.destinos, filtro: 'texto' },
   {
-    id: 'ultima', largura: 104,
+    id: 'material',
+    titulo: 'Material',
+    largura: 300,
+    valor: (s) => s.material,
+    mostrar: (s) => celulaMaterial(s.item, s.material),
+    busca: (s) => s.item.id,
+    filtro: 'texto',
+  },
+  { id: 'categoria', titulo: 'Categoria', largura: 150, valor: (s) => s.categoria, filtro: 'lista' },
+  {
+    id: 'estado',
+    titulo: 'Estado',
+    largura: 130,
+    valor: (s) => estado(s.estado).nome,
+    mostrar: (s) => <SeloEstado id={s.estado} />,
+    filtro: 'lista',
+  },
+  {
+    id: 'total',
+    titulo: 'Total que saiu',
+    largura: 130,
+    valor: (s) => s.total,
+    mostrar: (s) => qtd(s.total, s.unidade),
+    filtro: 'nenhum',
+    classe: 'num',
+  },
+  { id: 'destinos', titulo: 'Destinos', largura: 200, valor: (s) => s.destinos, filtro: 'texto' },
+  {
+    id: 'ultima',
     titulo: 'Última saída',
+    largura: 120,
     valor: (s) => s.ultima ?? 0,
     mostrar: (s) => (s.ultima ? dataCurta(s.ultima) : ''),
     filtro: 'nenhum',
-    classe: 'nao-quebra',
   },
 ]
 
@@ -145,12 +231,18 @@ export default function Planilha() {
               </tbody>
             </table>
           ))}
-          <p className="fraco">Atualizada agora ({dataHora(r.geradoEm)}).</p>
         </div>
       )}
 
       {aba === 'estoque' && (
-        <TabelaFiltrada id="estoque" linhas={r.estoque} colunas={COL_ESTOQUE} chave={(l) => l.item.id} aoTocar={abrir} />
+        <TabelaFiltrada
+          id="estoque"
+          linhas={r.estoque}
+          colunas={COL_ESTOQUE}
+          chave={(l) => l.item.id}
+          aoTocar={abrir}
+          dicaBusca="Buscar por nome, código, local…"
+        />
       )}
       {aba === 'movimentos' && (
         <TabelaFiltrada
@@ -159,9 +251,19 @@ export default function Planilha() {
           colunas={COL_MOVIMENTOS}
           chave={(m, i) => `${m.item.id}-${m.em}-${i}`}
           aoTocar={abrir}
+          dicaBusca="Buscar por material, observação, pessoa…"
         />
       )}
-      {aba === 'saidos' && <TabelaFiltrada id="saidos" linhas={r.saidos} colunas={COL_SAIDOS} chave={(s) => s.item.id} aoTocar={abrir} />}
+      {aba === 'saidos' && (
+        <TabelaFiltrada
+          id="saidos"
+          linhas={r.saidos}
+          colunas={COL_SAIDOS}
+          chave={(s) => s.item.id}
+          aoTocar={abrir}
+          dicaBusca="Buscar por material, código, destino…"
+        />
+      )}
     </div>
   )
 }

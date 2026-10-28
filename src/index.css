@@ -2010,3 +2010,371 @@ body.arrastando-coluna {
     min-width: var(--soma);
   }
 }
+
+/* =====================================================================
+   Planilha v2 — mais leve e amigável (referências: Airtable, Notion,
+   Google Sheets): cabeçalho claro, filtro no menu ▾ de cada coluna,
+   etiquetas dos filtros ativos, barra com busca e "Colunas".
+   ===================================================================== */
+
+.tabela-filtrada {
+  margin-top: 0.4rem;
+}
+
+.barra-tabela {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.busca-tabela {
+  flex: 1 1 16rem;
+  max-width: 26rem;
+  padding: 0.55rem 0.8rem 0.55rem 2.1rem !important;
+  border: 1.5px solid var(--borda-suave) !important;
+  border-radius: 10px !important;
+  background: var(--papel)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235f6b62' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 3.5 3.5'/%3E%3C/svg%3E")
+    no-repeat 0.7rem center !important;
+  font-size: 0.92rem;
+}
+
+.botao-barra {
+  padding: 0.5rem 0.8rem;
+  border: 1.5px solid var(--borda-suave);
+  border-radius: 10px;
+  background: var(--papel);
+  color: var(--tinta);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botao-barra:hover {
+  background: var(--verde-claro);
+}
+
+.barra-tabela .contagem {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.etiquetas-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-top: 0.55rem;
+}
+
+.etiqueta-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  padding: 0.3rem 0.4rem 0.3rem 0.7rem;
+  border: 1px solid #b9d3b8;
+  border-radius: 99px;
+  background: var(--verde-claro);
+  color: var(--verde-escuro);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.etiqueta-filtro span {
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.08);
+  font-size: 0.65rem;
+}
+
+.etiqueta-filtro.ordem {
+  border-color: var(--borda-suave);
+  background: var(--papel);
+  color: var(--tinta);
+}
+
+.etiquetas-filtro .link {
+  font-size: 0.82rem;
+}
+
+/* Tabela: cabeçalho claro, linhas separadas por traço fino. */
+.tabela-filtrada .tabela-rolagem {
+  margin-top: 0.6rem;
+  border: 1px solid var(--borda-suave);
+  border-radius: 12px;
+  background: var(--papel);
+  box-shadow: var(--sombra-1);
+}
+
+.tabela-filtrada .grade th {
+  padding: 0;
+  background: #f1ede3;
+  color: var(--tinta);
+  border-bottom: 1px solid var(--borda-suave);
+  font-size: 0.8rem;
+  text-transform: none;
+}
+
+.tabela-filtrada .grade th.th-ativa {
+  background: #e3ecdf;
+}
+
+.th-botao {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.9rem 0.45rem 0.65rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.th-botao:hover {
+  background: rgb(0 0 0 / 0.04);
+}
+
+.th-titulo {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.th-icone {
+  color: var(--verde);
+  font-weight: 700;
+}
+
+.th-seta {
+  margin-left: auto;
+  color: var(--fraco);
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.th-botao:hover .th-seta,
+.th-ativa .th-seta {
+  opacity: 1;
+}
+
+.grade th.num .th-botao {
+  justify-content: flex-end;
+}
+
+.grade th.num .th-seta {
+  margin-left: 0.2rem;
+}
+
+.tabela-filtrada .alca::after {
+  background: var(--borda-suave);
+}
+
+.tabela-filtrada .grade td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid #ece7db;
+  font-size: 0.88rem;
+}
+
+.tabela-filtrada .grade tbody tr:nth-child(even) {
+  background: none;
+}
+
+.tabela-filtrada .grade tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabela-filtrada .grade tbody tr:hover {
+  background: #f6f9f4;
+}
+
+.celula-material {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.celula-material > div {
+  min-width: 0;
+}
+
+.celula-material strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 650;
+}
+
+.celula-material small,
+.duas-linhas small {
+  display: block;
+  color: var(--fraco);
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.celula-material .miniatura {
+  flex: none;
+  border-radius: 9px;
+}
+
+.pilula {
+  display: inline-block;
+  padding: 0.12rem 0.55rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pilula.tipo-entrada {
+  background: #e3f1e8;
+  color: #2e7d4f;
+}
+
+.pilula.tipo-saida {
+  background: #fbecd6;
+  color: #9a5d06;
+}
+
+.pilula.tipo-ajuste {
+  background: #ecebe6;
+  color: var(--fraco);
+}
+
+.vazio-celula {
+  color: #c4bdae;
+}
+
+/* Menus flutuantes (filtro da coluna e "Colunas"). */
+.flutuante {
+  position: fixed;
+  z-index: 40;
+  width: 16rem;
+  max-height: min(26rem, 70vh);
+  overflow: auto;
+  padding: 0.4rem;
+  border: 1px solid var(--borda-suave);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.16);
+}
+
+.menu-titulo {
+  margin: 0.2rem 0.5rem 0.35rem;
+  color: var(--fraco);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--tinta);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: #f1ede3;
+}
+
+.menu-item.ativo {
+  background: var(--verde-claro);
+  color: var(--verde-escuro);
+  font-weight: 700;
+}
+
+.menu-separador {
+  height: 1px;
+  margin: 0.35rem 0.2rem;
+  background: #ece7db;
+}
+
+.menu-busca {
+  width: 100%;
+  margin: 0.15rem 0 0.3rem;
+  padding: 0.45rem 0.6rem !important;
+  border: 1.5px solid var(--borda-suave) !important;
+  border-radius: 8px !important;
+  font-size: 0.88rem;
+}
+
+.menu-valores {
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.menu-opcao {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.menu-opcao:hover {
+  background: #f1ede3;
+}
+
+.menu-opcao input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--verde);
+}
+
+.menu-valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-n {
+  color: var(--fraco);
+  font-size: 0.78rem;
+}
+
+.menu-vazio {
+  margin: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.flutuante .link {
+  display: block;
+  margin: 0.3rem 0.5rem 0.2rem;
+  font-size: 0.85rem;
+}
+
+/* Título da coluna quebra em até duas linhas em vez de cortar a palavra. */
+.th-titulo {
+  white-space: normal;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
